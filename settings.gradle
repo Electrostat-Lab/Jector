@@ -1,0 +1,4 @@
+rootProject.name = 'Jector'
+include('jector')
+include('jector-examples')
+

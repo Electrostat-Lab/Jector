@@ -1,0 +1,16 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClass = 'com.avrsandbox.jector.examples.TestTaskBinder'
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(path: ':jector')
+}

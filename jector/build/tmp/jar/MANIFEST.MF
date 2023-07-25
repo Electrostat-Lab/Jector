@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Project: Jector
+Version: null
+Automatic-Module-Name: jector
+Compiled-by: 17
+
