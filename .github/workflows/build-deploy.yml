@@ -42,8 +42,8 @@ jobs:
         - name: Archive build
           uses: actions/upload-artifact@v3
           with:
-            name: automata4j-build
-            path: automata4j/build/libs
+            name: jector-build
+            path: jector/build/libs
 
     deploy:
           environment:
@@ -97,10 +97,10 @@ jobs:
             - name: Download build
               uses: actions/download-artifact@v3
               with:
-                name: automata4j-build
-                path: automata4j/build/libs/
+                name: jector-build
+                path: jector/build/libs/
                 
-            - name: Deploying automata4j binaries
+            - name: Deploying jector binaries
               env:
                 OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
                 OSSRH_TOKEN: ${{ secrets.OSSRH_TOKEN }}
