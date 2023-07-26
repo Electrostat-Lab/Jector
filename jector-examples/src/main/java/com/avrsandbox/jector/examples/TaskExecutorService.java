@@ -83,5 +83,7 @@ public class TaskExecutorService implements Worker {
                                      .get("writeMessage")
                                      .getResult());
         System.out.println("-----------------------------------------------------");
+
+        System.exit(0);
     }
 }
