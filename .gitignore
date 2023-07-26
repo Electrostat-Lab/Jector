@@ -1,4 +1,5 @@
 /.idea
 /.git
 /.gradle
-/build
+/jector/build
+/jector-examples/build
