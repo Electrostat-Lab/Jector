@@ -30,6 +30,9 @@
 */
 package com.avrsandbox.jector.core.command;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Represents generic method arguments for an annotated method with
  * the annotation {@link ExecuteOn}.
@@ -44,14 +47,21 @@ public class MethodArguments<T> {
     /**
      * An array of generic objects to be passed to the bound method.
      */
-    protected T[] args;
+    protected Map<String, T> args;
+
+    /**
+     * For empty initialization.
+     */
+    public MethodArguments() {
+        this.args = new HashMap<String, T>();
+    }
 
     /**
      * Instantiates a method args object that wraps an array of generified objects.
      * 
      * @param args an array of generified objects
      */
-    public MethodArguments(T[] args) {
+    public MethodArguments(Map<String, T> args) {
         this.args = args;
     }
 
@@ -62,7 +72,7 @@ public class MethodArguments<T> {
      * 
      * @return an array of generified objects
      */
-    public T[] getArgs() {
+    public Map<String, T> getArgs() {
         return args;
     }
 
@@ -71,7 +81,7 @@ public class MethodArguments<T> {
      * 
      * @param args the new array object
      */
-    public void setArgs(T[] args) {
+    public void setArgs(Map<String, T> args) {
         this.args = args;
     }
 }

@@ -1,4 +1,5 @@
 rootProject.name = 'Jector'
 include('jector')
+include('jector-monkey')
 include('jector-examples')
 

@@ -28,6 +28,7 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.avrsandbox.jector.core.work;
 
 import java.util.concurrent.Callable;
@@ -49,7 +50,7 @@ public abstract class WorkerTask<T> implements Callable<T> {
     /**
      * A thread-safe flag to enable/disable this task.
      */
-    protected volatile boolean enabled = false;
+    protected volatile boolean active = false;
 
     /**
      * A thread-safe object representing the return value of this task,
@@ -72,8 +73,8 @@ public abstract class WorkerTask<T> implements Callable<T> {
      * 
      * @param enabled true to enable this task, false otherwise
      */
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     /**
@@ -101,8 +102,8 @@ public abstract class WorkerTask<T> implements Callable<T> {
      * 
      * @return true if this task is enabled, false otherwise
      */
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isActive() {
+        return active;
     }
 
     /**

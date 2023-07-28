@@ -30,16 +30,12 @@
 */
 package com.avrsandbox.jector.examples;
 
-import java.util.Map;
-import java.util.Arrays;
-import java.util.concurrent.locks.ReentrantLock;
 import com.avrsandbox.jector.core.work.TaskBinder;
 import com.avrsandbox.jector.core.work.TaskExecutor;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.command.ExecuteOn;
 import com.avrsandbox.jector.core.work.Worker;
 import com.avrsandbox.jector.core.work.WorkerTask;
-import com.avrsandbox.jector.examples.TestTaskBinder;
 
 /**
  * Provides a worker implementation to inject some callable {@link WorkerTask}s (dependencies)
@@ -57,6 +53,8 @@ public class TaskExecutorService implements Worker {
         try {
             System.out.println("-----------------------------------------------------");
             System.out.println(Thread.currentThread().getName());
+            System.out.println(methodArguments.getArgs()
+                                              .get("message"));
             System.out.println("-----------------------------------------------------");
             return "Hello Jector!";
         } finally {
@@ -65,7 +63,7 @@ public class TaskExecutorService implements Worker {
                       .get(TestTaskBinder.Looper.class)
                       .getTasks()
                       .get("showMessage")
-                      .setEnabled(true);
+                      .setActive(true);
         }
     }
 

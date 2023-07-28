@@ -31,17 +31,17 @@
 package com.avrsandbox.jector.examples;
 
 import com.avrsandbox.jector.core.thread.AppThread;
+import java.util.HashMap;
+import java.util.Map;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.thread.concurrency.ConcurrentAppThread;
 import com.avrsandbox.jector.core.work.TaskBinder;
-import com.avrsandbox.jector.core.work.Worker;
 
 /**
  * A live example for the Jector Framework concurrency model.
  * 
  * @author pavl_g
  */
-@SuppressWarnings("unchecked")
 public final class TestTaskBinder {
 
     private static final AppThread looperThread = new Looper();
@@ -61,18 +61,20 @@ public final class TestTaskBinder {
         taskBinder.registerTaskExecutor(foregroundThread);
 
         /* 3) Binds worker methods to their executors via worker tasks */
-        taskBinder.bind(new MethodArguments<String>(new String[]{"Hello", "World"}));
+        Map<String, String> methodArgs = new HashMap<>();
+        methodArgs.put("message", "Hello World!");
+        taskBinder.bind(new MethodArguments<String>(methodArgs));
         
         /* 4) Enables executors */
-        looperThread.setEnabled(true);
-        daemonThread.setEnabled(true);
+        looperThread.setActive(true);
+        daemonThread.setActive(true);
 
         /* 5) Triggers tasks to run */
         taskBinder.getTaskExecutors()
                   .get(TestTaskBinder.Daemon.class)
                   .getTasks()
                   .get("writeMessage")
-                  .setEnabled(true);
+                  .setActive(true);
     }
 
     public static class Looper extends ConcurrentAppThread {

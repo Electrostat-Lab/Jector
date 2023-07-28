@@ -28,14 +28,13 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.avrsandbox.jector.core.thread;
 
 import com.avrsandbox.jector.core.work.WorkerTask;
 import com.avrsandbox.jector.core.work.TaskExecutor;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,7 +64,7 @@ public class AppThread extends Thread implements TaskExecutor {
     /**
      * A flag to order the executor to start running.
      */
-    protected volatile boolean enabled = false;
+    protected volatile boolean active = false;
 
     /**
      * Instantiates an app thread object. 
@@ -79,36 +78,37 @@ public class AppThread extends Thread implements TaskExecutor {
     @Override
     public void run() {
         while (!isTerminated()){
-            if (!isEnabled()) {
+            if (!isActive()) {
                 continue;
             }
-            runTasks();
+            executeTasks(isTerminated());
         }
     }
 
     @Override
-    public boolean isEnabled() {
-        return enabled;
+    public boolean isActive() {
+        return active;
     }
 
     @Override
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     @Override
-    public void addTask(Method method, WorkerTask task) {
-        tasks.put(method.getName(), task);
+    @SuppressWarnings("unchecked")
+    public <T> void addTask(Method method, WorkerTask<T> task) {
+        tasks.put(method.getName(), (WorkerTask<Object>) task);
     }
 
     @Override
-    public void runTasks() {
+    public void executeTasks(Object arguments) {
         try {
             for (String task : tasks.keySet()) {
                 if (tasks.get(task).isExecuted()) {
                     continue;
                 }
-                if (!tasks.get(task).isEnabled()) {
+                if (!tasks.get(task).isActive()) {
                     continue;
                 }
                 /* Saves the result of the execution order! */

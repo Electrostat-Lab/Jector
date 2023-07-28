@@ -3,7 +3,7 @@ plugins {
 }
 
 application {
-    mainClass = 'com.avrsandbox.jector.examples.TestTaskBinder'
+    mainClass = 'com.avrsandbox.jector.examples.monkey.TestMonkeyTaskBinder'
 }
 
 repositories {
@@ -13,4 +13,9 @@ repositories {
 
 dependencies {
     implementation project(path: ':jector')
+    implementation project(path: ':jector-monkey')
+    implementation "org.jmonkeyengine:jme3-core:3.6.1-stable"
+    implementation "org.jmonkeyengine:jme3-desktop:3.6.1-stable"
+    implementation "org.jmonkeyengine:jme3-lwjgl3:3.6.1-stable"
+
 }

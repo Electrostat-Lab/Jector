@@ -28,11 +28,11 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.avrsandbox.jector.core.thread.concurrency;
 
 import com.avrsandbox.jector.core.thread.AppThread;
 import com.avrsandbox.jector.core.work.WorkerTask;
-import com.avrsandbox.jector.core.work.TaskExecutor;
 import java.util.concurrent.locks.ReentrantLock;
 import java.lang.reflect.Method;
 
@@ -58,7 +58,7 @@ public class ConcurrentAppThread extends AppThread {
     }
 
     @Override
-    public void addTask(Method method, WorkerTask task) {
+    public <T> void addTask(Method method, WorkerTask<T> task) {
         try {
             reentrantLock.lock();
             super.addTask(method, task);
@@ -68,10 +68,10 @@ public class ConcurrentAppThread extends AppThread {
     }
 
     @Override
-    public void runTasks() {
+    public void executeTasks(Object arguments) {
         try {
             reentrantLock.lock();
-            super.runTasks();
+            super.executeTasks(arguments);
         } finally {
             reentrantLock.unlock();
         }
