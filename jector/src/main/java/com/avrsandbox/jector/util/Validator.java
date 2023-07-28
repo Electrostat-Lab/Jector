@@ -30,10 +30,8 @@
 */
 package com.avrsandbox.jector.util;
 
-import com.avrsandbox.jector.core.command.MethodArguments;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Method;
-import java.lang.IllegalStateException;
 import java.lang.IllegalArgumentException;
 
 /**

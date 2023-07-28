@@ -28,11 +28,11 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.avrsandbox.jector.core.work;
 
 import java.lang.reflect.Method;
 import java.util.Map;
-import com.avrsandbox.jector.core.work.WorkerTask;
 
 /**
  * A general-purpose abstraction representing the entity executing the methods (dependencies) in 
@@ -53,9 +53,11 @@ public interface TaskExecutor {
     <T> void addTask(Method method, WorkerTask<T> task);
 
     /**
-     * Runs the tasks in synchrony.
+     * Runs the tasks in synchrony with some arguments.
+     * 
+     * @param arguments object args
      */
-    void runTasks();
+    void executeTasks(Object arguments);
 
     /**
      * Terminates this task executor. 
@@ -74,14 +76,14 @@ public interface TaskExecutor {
      * 
      * @return true if this executor should be active, false otherwise
      */
-    boolean isEnabled();
+    boolean isActive();
 
     /**
      * Sets the activity of this instance.
      * 
-     * @param enabled true to be regarded as active, false otherwise
+     * @param active true to be regarded as active, false otherwise
      */
-    void setEnabled(boolean enabled);
+    void setActive(boolean active);
 
     /**
      * Retrieves the tasks to be executed by this instance.

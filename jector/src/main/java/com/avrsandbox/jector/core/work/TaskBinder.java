@@ -28,18 +28,17 @@
 * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
+
 package com.avrsandbox.jector.core.work;
 
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.command.ExecuteOn;
-import com.avrsandbox.jector.core.work.TaskExecutor;
 import com.avrsandbox.jector.util.Validator;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.IllegalAccessException;
 import java.util.HashMap;
-import java.util.function.Function;
 
 /**
  * A bridging API that binds annotated {@link ExecuteOn} methods in a {@link Worker} as 

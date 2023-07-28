@@ -1,0 +1,42 @@
+plugins {
+    // Apply the java-library plugin for API and implementation separation.
+    id 'java-library'
+}
+
+tasks.register("generateJavadocJar", Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+tasks.register("generateSourcesJar", Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+jar { // assemble jar options [java -jar]
+    manifest {
+        attributes 'Project': "Jector-Monkey",
+                   'Version': "${version}",
+                   'Automatic-Module-Name': "${project.name.replace("-", ".")}",
+                   'Compiled-by': JavaVersion.current()
+    }
+}
+
+repositories {
+    // Use Maven Central for resolving dependencies.
+    mavenCentral()
+}
+
+dependencies {
+    // Use JUnit Jupiter for testing.
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.9.1'
+
+    implementation project(path: ':jector')
+
+    implementation "org.jmonkeyengine:jme3-core:3.6.1-stable"
+}
+
+tasks.named('test') {
+    // Use JUnit Platform for unit tests.
+    useJUnitPlatform()
+}
