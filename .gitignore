@@ -1,6 +1,10 @@
 /.idea
+/.vscode
 /.git
 /.gradle
 /jector/build
+/jector/bin
 /jector-examples/build
+/jector-examples/bin
 /jector-monkey/build
+/jector-monkey/bin
