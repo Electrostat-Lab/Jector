@@ -79,6 +79,7 @@ public final class Tasks {
      * Retrieves a worker task return value from its task executor object (which is registered to
      * a task binder).
      *
+     * @param <T> a method generic to avoid further dynamic casting
      * @param taskExecutorsManager the manager instance holding the TaskExecutors
      * @param clazz the represented executor holding the task to retrieve
      * @param name the name of the task to retrieve (usually the name of the worker method)
