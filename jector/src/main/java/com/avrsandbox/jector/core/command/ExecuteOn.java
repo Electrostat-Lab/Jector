@@ -30,7 +30,7 @@
 */
 package com.avrsandbox.jector.core.command;
 
-import com.avrsandbox.jector.core.work.TaskBinder;
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.TaskExecutor;
 import com.avrsandbox.jector.core.work.Worker;
 import java.lang.annotation.RetentionPolicy;
@@ -49,11 +49,11 @@ public @interface ExecuteOn {
     
     /**
      * Specifies which objects will execute those annotated methods, methods 
-     * are bound to their executors via a {@link TaskBinder} instance.
+     * are bound to their executors via a {@link TaskExecutorsManager} instance.
      * 
      * <p>
      * 
-     * TaskExecutors specified must be registered using {@link TaskBinder#registerTaskExecutor(TaskExecutor)}
+     * TaskExecutors specified must be registered using {@link TaskExecutorsManager#registerTaskExecutor(TaskExecutor)}
      * before being able to receive annotated methods.
      * 
      * @return an array of classes representing the registered task executors

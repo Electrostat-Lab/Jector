@@ -37,15 +37,9 @@ import java.util.concurrent.Callable;
  * Defines a task for a worker object, a task maps a method to be
  * executed in the annotated {@link TaskExecutor}.
  * 
- * @param <T> class-generic type for the return type of this task
  * @author pavl_g
  */
-public abstract class WorkerTask<T> implements Callable<T> {
-
-    /**
-     * A thread-safe flag to test whether this task has been executed before.
-     */
-    protected volatile boolean executed;
+public abstract class WorkerTask implements Callable<Object> {
 
     /**
      * A thread-safe flag to enable/disable this task.
@@ -56,7 +50,7 @@ public abstract class WorkerTask<T> implements Callable<T> {
      * A thread-safe object representing the return value of this task,
      * "null" if a void task is specified.
      */
-    protected volatile T result;
+    protected volatile Object result;
 
     /**
      * Sets the return result of this task, "null" if a task to a void
@@ -64,14 +58,14 @@ public abstract class WorkerTask<T> implements Callable<T> {
      * 
      * @param result the new result of this task
      */
-    public void setResult(T result) {
+    public void setResult(Object result) {
         this.result = result;
     }
 
     /**
      * Marks this task as enabled/disabled, default value is "false".
      * 
-     * @param enabled true to enable this task, false otherwise
+     * @param active true to enable this task, false otherwise
      */
     public void setActive(boolean active) {
         this.active = active;
@@ -83,18 +77,8 @@ public abstract class WorkerTask<T> implements Callable<T> {
      * @return the return result of this task, "null" if a void method is 
      *         mapped to this task instance
      */
-    public T getResult() {
+    public Object getResult() {
         return result;
-    }
-
-    /**
-     * Tests whether this worker task has been executed at least once,
-     * default value is "false".
-     * 
-     * @return true if this worker task should have been executed before
-     */
-    public boolean isExecuted() {
-        return executed;
     }
 
     /**
@@ -104,12 +88,5 @@ public abstract class WorkerTask<T> implements Callable<T> {
      */
     public boolean isActive() {
         return active;
-    }
-
-    /**
-     * Marks this task as executed before, default value is "false".
-     */
-    public void setExecuted() {
-        this.executed = true;
     }
 }

@@ -30,6 +30,8 @@
 */
 package com.avrsandbox.jector.core.command;
 
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,23 +39,20 @@ import java.util.Map;
  * Represents generic method arguments for an annotated method with
  * the annotation {@link ExecuteOn}.
  * 
- * @param <T> a class generic used to specify the type of the arguments 
- *            passed for a bound method, use {@link Object} to pass heterogenous types.
- * 
  * @author pavl_g
  */
-public class MethodArguments<T> {
+public class MethodArguments {
 
     /**
      * An array of generic objects to be passed to the bound method.
      */
-    protected Map<String, T> args;
+    protected Map<String, Object> args;
 
     /**
      * For empty initialization.
      */
     public MethodArguments() {
-        this.args = new HashMap<String, T>();
+        this.args = new HashMap<>();
     }
 
     /**
@@ -61,18 +60,18 @@ public class MethodArguments<T> {
      * 
      * @param args an array of generified objects
      */
-    public MethodArguments(Map<String, T> args) {
+    public MethodArguments(Map<String, Object> args) {
         this.args = args;
     }
 
     /**
      * Retrieves the generified arguments, use this method inside your 
      * bound method (injected dependency) to fetch the arguments passed from the 
-     * {@link com.avrsandbox.jector.core.work.TaskBinder} instance (the injector instance).
+     * {@link TaskExecutorsManager} instance (the injector instance).
      * 
      * @return an array of generified objects
      */
-    public Map<String, T> getArgs() {
+    public Map<String, Object> getArgs() {
         return args;
     }
 
@@ -81,7 +80,7 @@ public class MethodArguments<T> {
      * 
      * @param args the new array object
      */
-    public void setArgs(Map<String, T> args) {
+    public void setArgs(Map<String, Object> args) {
         this.args = args;
     }
 }

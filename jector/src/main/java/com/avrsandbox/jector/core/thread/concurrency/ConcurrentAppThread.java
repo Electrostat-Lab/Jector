@@ -58,7 +58,7 @@ public class ConcurrentAppThread extends AppThread {
     }
 
     @Override
-    public <T> void addTask(Method method, WorkerTask<T> task) {
+    public void addTask(Method method, WorkerTask task) {
         try {
             reentrantLock.lock();
             super.addTask(method, task);

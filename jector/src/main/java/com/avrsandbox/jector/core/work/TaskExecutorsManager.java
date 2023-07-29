@@ -49,7 +49,7 @@ import java.util.HashMap;
  * 
  * @author pavl_g
  */
-public class TaskBinder {
+public class TaskExecutorsManager {
 
     /**
      * The associated worker implementation.
@@ -66,7 +66,7 @@ public class TaskBinder {
      *
      * @param worker an instance of worker
      */
-    public TaskBinder(Worker worker) {
+    public TaskExecutorsManager(Worker worker) {
         this(new Worker[] {worker});
     }
 
@@ -75,7 +75,7 @@ public class TaskBinder {
      * 
      * @param workers an array of the worker instances
      */
-    public TaskBinder(Worker[] workers) {
+    public TaskExecutorsManager(Worker[] workers) {
         this.workers = workers;
     }
 
@@ -166,7 +166,7 @@ public class TaskBinder {
 
     /**
      * Sets the worker instance associated with this task binder, if this
-     * setter is invoked before calling {@link TaskBinder#bind(MethodArguments)},
+     * setter is invoked before calling {@link TaskExecutorsManager#bind(MethodArguments)},
      * then dependency injection will be redirected from this new worker implementation.
      * 
      * @param workers a new workers array
@@ -218,10 +218,10 @@ public class TaskBinder {
             public Object call() {
                 /* The Triple Check Pattern (No. of parameters - Input args - Types compatibility) */
                 if (method.getParameters() != null) {
-                    return executeMethod(worker, method, args, TaskBinder.this);
+                    return executeMethod(worker, method, args, TaskExecutorsManager.this);
                 } else {
                     /* Force null args for non-parameterized methods */
-                    return executeMethod(worker, method, null, TaskBinder.this);
+                    return executeMethod(worker, method, null, TaskExecutorsManager.this);
                 }
             }
         });
@@ -234,18 +234,18 @@ public class TaskBinder {
      * @param method the method to execute, should be of the signature 
      *               [Object method(MethodArguments, TaskBinder)]
      * @param args the method arguments data structure
-     * @param taskBinder the task binder object
+     * @param taskExecutorsManager the task binder object
      * @return the return value of the method execution
      */
-    protected Object executeMethod(Worker worker, Method method, MethodArguments args, TaskBinder taskBinder) {
+    protected Object executeMethod(Worker worker, Method method, MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         try {
             if (args != null && args.getArgs() != null) {
                 Validator.validateParametersLength(method, 2);
                 Validator.validateParameterType(method, 0, args.getClass());
-                Validator.validateParameterType(method, 1, taskBinder.getClass());
-                return method.invoke(worker, args, taskBinder);
+                Validator.validateParameterType(method, 1, taskExecutorsManager.getClass());
+                return method.invoke(worker, args, taskExecutorsManager);
             } else {
-                return method.invoke(worker, taskBinder);
+                return method.invoke(worker, taskExecutorsManager);
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();

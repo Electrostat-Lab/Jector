@@ -45,12 +45,10 @@ public interface TaskExecutor {
     /**
      * Maps a new worker task to its worker method object.
      *  
-     * @param <T> a parameter-generic specifying the type of the 
-     *            return values of the worker tasks 
      * @param method the method signifying this task
      * @param task a task instance
      */
-    <T> void addTask(Method method, WorkerTask<T> task);
+    void addTask(Method method, WorkerTask task);
 
     /**
      * Runs the tasks in synchrony with some arguments.
@@ -88,9 +86,7 @@ public interface TaskExecutor {
     /**
      * Retrieves the tasks to be executed by this instance.
      * 
-     * @param <T> a parameter-generic specifying the type of the 
-     *            return values of the worker tasks
      * @return a map of tasks to be executed
      */
-    <T> Map<String, WorkerTask<T>> getTasks();
+    Map<String, WorkerTask> getTasks();
 }
