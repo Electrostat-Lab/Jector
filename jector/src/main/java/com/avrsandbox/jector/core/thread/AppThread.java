@@ -41,9 +41,7 @@ import java.util.Map;
  * Represents the base implementation of a task executor that provides the thread-based implementation, the dependent (receiver)
  * object in this DI framework.
  * 
- * <p>
- * 
- * Annotated methods with {@link com.avrsandbox.jector.core.command.ExecuteOn} inside a {@link com.avrsandbox.jector.core.work.Worker}
+ * <p> Annotated methods with {@link com.avrsandbox.jector.core.command.ExecuteOn} inside a {@link com.avrsandbox.jector.core.work.Worker}
  * are submitted as tasks to be executed on the specified implementations of the {@link com.avrsandbox.jector.core.work.TaskExecutor}, the implementations classes are 
  * specified by annotating them in the array {@link com.avrsandbox.jector.core.command.ExecuteOn#executors()}.
  *
@@ -54,7 +52,7 @@ public class AppThread extends Thread implements TaskExecutor {
     /**
      * Tasks wrapping the methods to be bound to their specified annotated methods.
      */
-    protected final Map<String, WorkerTask<Object>> tasks = new HashMap<>();
+    protected final Map<String, WorkerTask> tasks = new HashMap<>();
 
     /**
      * A flag to order the executor for termination.
@@ -96,24 +94,21 @@ public class AppThread extends Thread implements TaskExecutor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> void addTask(Method method, WorkerTask<T> task) {
-        tasks.put(method.getName(), (WorkerTask<Object>) task);
+    public void addTask(Method method, WorkerTask task) {
+        tasks.put(method.getName(), task);
     }
 
     @Override
     public void executeTasks(Object arguments) {
         try {
             for (String task : tasks.keySet()) {
-                if (tasks.get(task).isExecuted()) {
-                    continue;
-                }
                 if (!tasks.get(task).isActive()) {
                     continue;
                 }
                 /* Saves the result of the execution order! */
                 tasks.get(task).setResult(tasks.get(task).call());
-                tasks.get(task).setExecuted();
+                /* Triggers for a single run */
+                tasks.get(task).setActive(false);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -121,7 +116,7 @@ public class AppThread extends Thread implements TaskExecutor {
     }
 
     @Override
-    public Map<String, WorkerTask<Object>> getTasks() {
+    public Map<String, WorkerTask> getTasks() {
         return tasks;
     }
 
