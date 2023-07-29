@@ -208,6 +208,7 @@ public class TaskExecutorsManager {
      * Binds a method to a task executor instance by wrapping it into a {@link WorkerTask}.
      *
      * @param taskExecutor the executor instance
+     * @param worker the worker class containing the runnable annotated methods
      * @param method the method to wrap as a task
      * @param args the method arguments, or null for nullary methods
      */
@@ -230,7 +231,8 @@ public class TaskExecutorsManager {
     /**
      * Executes a method passing in its arguments object and the binder object,
      * the signature of the parameterized methods must be [Object method(MethodArguments, TaskBinder)].
-     * 
+     *
+     * @param worker the worker class containing the runnable annotated methods
      * @param method the method to execute, should be of the signature 
      *               [Object method(MethodArguments, TaskBinder)]
      * @param args the method arguments data structure

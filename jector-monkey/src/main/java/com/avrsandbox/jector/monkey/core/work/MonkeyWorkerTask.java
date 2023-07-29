@@ -48,6 +48,14 @@ public abstract class MonkeyWorkerTask extends WorkerTask {
     protected float timePerFrame;
 
     /**
+     * Instantiates a JME worker task mapping a method to be executed
+     * on the JME-3 Main thread.
+     */
+    public MonkeyWorkerTask() {
+        super();
+    }
+
+    /**
      * Updates the time-per-frame value (in seconds).
      *
      * @param timePerFrame the new value (in seconds)

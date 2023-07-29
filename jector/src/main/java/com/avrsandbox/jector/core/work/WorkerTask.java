@@ -35,7 +35,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Defines a task for a worker object, a task maps a method to be
- * executed in the annotated {@link TaskExecutor}.
+ * executed with the annotated {@link TaskExecutor}.
  * 
  * @author pavl_g
  */
@@ -51,6 +51,12 @@ public abstract class WorkerTask implements Callable<Object> {
      * "null" if a void task is specified.
      */
     protected volatile Object result;
+
+    /**
+     * Instantiates a worker task mapping a method to be executed.
+     */
+    public WorkerTask() {
+    }
 
     /**
      * Sets the return result of this task, "null" if a task to a void
