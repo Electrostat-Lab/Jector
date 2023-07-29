@@ -7,13 +7,18 @@ repository="ossrh"
 groupId="io.github.software-hardware-codesign"
 maven_version="3.9.3"
 maven_bin="./apache-maven-$maven_version/bin/mvn"
-desktop_pomFile="./helper-scripts/project-impl/publishing/jector.pom"
+
+lib_pomFile="./helper-scripts/project-impl/publishing/jector.pom"
+ext_pomFile="./helper-scripts/project-impl/publishing/jector.pom"
+
 passphrase="avrsandbox"
 
-desktop_artifactId_release="jector"
+lib_artifactId_release="jector"
+ext_artifactId_release="jector-monkey"
 
-desktop_artifactId_debug="jector-debug"
+artifactId_debug="jector-debug"
 
 settings="./helper-scripts/project-impl/publishing/maven-settings.xml"
 build_dir="./jector/build/libs"
+ext_build_dir="./jector-monkey/build/libs"
 # ---------------------

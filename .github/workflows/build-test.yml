@@ -33,10 +33,13 @@ jobs:
             distribution: 'temurin' 
             java-version: '19'
 
-        - name: Compiling java
+        - name: Compiling jector
           run: ./gradlew --console="verbose" :jector:build
 
-        - name: Archive build
+        - name: Compiling jector-monkey
+          run: ./gradlew --console="verbose" :jector-monkey:build
+
+        - name: Archive jector
           uses: actions/upload-artifact@v3
           with:
             name: jector-snapshot
@@ -61,8 +64,11 @@ jobs:
               distribution: 'temurin' 
               java-version: '19'
 
-          - name: Generate javadoc
+          - name: Generate javadoc for jector
             run: chmod +rwx ./gradlew && ./gradlew :jector:generateJavadocJar
+
+          - name: Generate javadoc for jector-monkey
+            run: chmod +rwx ./gradlew && ./gradlew :jector-monkey:generateJavadocJar
 
     test:
         # runner images with architectures (variants)

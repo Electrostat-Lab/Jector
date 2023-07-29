@@ -36,14 +36,35 @@ jobs:
             distribution: 'temurin' 
             java-version: '19'
 
-        - name: Compiling java
+        - name: Building jector
           run: ./gradlew --console="verbose" -Pversion=${GITHUB_REF_NAME} :jector:build
 
-        - name: Archive build
+        - name: Building jector-monkey
+          run: ./gradlew --console="verbose" -Pversion=${GITHUB_REF_NAME} :jector-monkey:build
+
+        - name: Generate jector sources jar
+          run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector:generateSourcesJar
+
+        - name: Generate jector-monkey sources jar
+          run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector-monkey:generateSourcesJar
+
+        - name: Generate jector javadoc jar
+          run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector:generateJavadocJar
+
+        - name: Generate jector-monkey javadoc jar
+          run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector-monkey:generateJavadocJar
+
+        - name: Archive jector
           uses: actions/upload-artifact@v3
           with:
             name: jector-build
             path: jector/build/libs
+
+        - name: Archive jector-monkey
+          uses: actions/upload-artifact@v3
+          with:
+            name: jector-monkey-build
+            path: jector-monkey/build/libs
 
     deploy:
           environment:
@@ -87,18 +108,18 @@ jobs:
             - name: Send public key 'avrsandbox'
               # sends the public key to a maven compatible host
               run: gpg --keyserver keyserver.ubuntu.com --send-keys 85A57D4975B6EE2B6D0EA46903DE10B9F12F0B20
-              
-            - name: Generate sources jar
-              run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector:generateSourcesJar
-              
-            - name: Generate javadoc jar
-              run: ./gradlew -Pversion=$GITHUB_REF_NAME :jector:generateJavadocJar
                           
-            - name: Download build
+            - name: Download jector build
               uses: actions/download-artifact@v3
               with:
                 name: jector-build
                 path: jector/build/libs/
+
+            - name: Download jector-monkey build
+              uses: actions/download-artifact@v3
+              with:
+                name: jector-monkey-build
+                path: jector-monkey/build/libs/
                 
             - name: Deploying jector binaries
               env:
