@@ -1,20 +1,43 @@
+/*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2023, The AvrSandbox Project, Jector Framework
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer.
+ *
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ *
+ * 3. Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 package com.avrsandbox.jector.monkey.core.work;
 
-import com.avrsandbox.jector.monkey.core.command.MonkeyMethodArguments;
-import com.avrsandbox.jector.monkey.core.work.MonkeyTaskBinder;
-import com.avrsandbox.jector.core.work.WorkerTask;
-import com.avrsandbox.jector.core.work.Worker;
 import com.avrsandbox.jector.core.work.TaskExecutor;
-import com.avrsandbox.jector.core.work.TaskBinder;
+import com.avrsandbox.jector.core.work.WorkerTask;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import com.jme3.util.SafeArrayList;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.IllegalAccessException;
 
 /**
  * A base implementation of the jector {@link TaskExecutor}s to a jMonkeyEngine app state.
@@ -26,10 +49,7 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     /**
      * Tasks wrapping the methods to be bound to their specified annotated methods.
      */
-    protected final Map<String, WorkerTask<Object>> tasks = new HashMap<>();
-
-
-    protected MonkeyTaskBinder taskBinder;
+    protected final Map<String, WorkerTask> tasks = new HashMap<>();
 
     /**
      * A flag to order the executor for termination.
@@ -41,79 +61,48 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
      */
     protected volatile boolean active = false;
 
+    /**
+     * Provides a universal tpf attribute for the associated tasks.
+     */
+    protected float timePerFrame;
 
-    protected final MonkeyMethodArguments methodArguments = new MonkeyMethodArguments();
+    /**
+     * Provides an interface to command-state the initialization.
+     */
+    protected OnExecutorInitialized onInitialized;
 
-    
-    public MonkeyTaskExecutor(String id, Worker worker) {
+    /**
+     * Instantiates a new instance of a task executor specialized to run on the JME thread only.
+     *
+     * @param id the associated state id
+     */
+    public MonkeyTaskExecutor(String id) {
         super(id);
-        taskBinder = new MonkeyTaskBinder(worker);
-        methodArguments.setTaskExecutor(this);
     }
 
     /**
-     * Registers a new instance of task executor, replacing the old 
-     * executor if called multiple times.
-     * 
-     * @param taskExecutor an instance of the TaskExecutor to execute annotated worker methods
+     * Retrieves the application time-per-frame in seconds.
+     *
+     * @return the JME app tpf in seconds
      */
-    public void registerTaskExecutor(TaskExecutor taskExecutor) {
-        taskBinder.getTaskExecutors().put(taskExecutor.getClass(), taskExecutor);
+    public float getTimePerFrame() {
+        return timePerFrame;
     }
 
     /**
-     * Creates a new instance of the {@link TaskExecutor}
-     * and adds it to the map of the registered executors replacing 
-     * the old instance if called multiple times.
-     * 
-     * @param clazz a class of type TaskExecutor
-     * @throws InstantiationException if the class that declares the underlying constructor represents an abstract class
-     * @throws IllegalAccessException if this Constructor object is enforcing Java language access control and the underlying constructor is inaccessible
-     * @throws NoSuchMethodException thrown when a particular constructor cannot be found
-     * @throws InvocationTargetException if the underlying constructor throws an exception (checked)
+     * Adjusts the initialization listener instance.
+     *
+     * @param onInitialized the initializer instance
      */
-    public void registerTaskExecutor(Class<? extends TaskExecutor> clazz) 
-                throws InstantiationException, IllegalAccessException, 
-                       NoSuchMethodException, InvocationTargetException {
-        registerTaskExecutor(clazz.getDeclaredConstructor().newInstance());
-    }
-
-    /**
-     * Unregisters a task executor.
-     * 
-     * @param taskExecutor a task executor instance to un-register
-     */
-    public void unregisterTaskExecutor(TaskExecutor taskExecutor) {
-        unregisterTaskExecutor(taskExecutor.getClass());
-    }
-
-    /**
-     * Unregisters a task executor directly using its class object.
-     * 
-     * @param clazz the class object of the task executor to be unregistered
-     */
-    public void unregisterTaskExecutor(Class<? extends TaskExecutor> clazz) {
-        taskBinder.getTaskExecutors().remove(clazz);
-    }
-
-    /**
-     * Retrieves the registered task executor instances, use this
-     * function to retrieve the {@link WorkerTask} return values when 
-     * building a callback API.
-     * 
-     * @return a map of the registered task executors
-     */
-    public Map<Class<? extends TaskExecutor>, TaskExecutor> getTaskExecutors() {
-        return taskBinder.getTaskExecutors();
-    }
-
-    MonkeyMethodArguments getMethodArguments() {
-        return methodArguments;
+    public void setOnInitialized(OnExecutorInitialized onInitialized) {
+        this.onInitialized = onInitialized;
     }
 
     @Override
     protected void initialize(Application app) {
-        taskBinder.bind(methodArguments);
+        if (onInitialized != null) {
+            onInitialized.onInitialized(app);
+        }
     }
 
     @Override
@@ -133,8 +122,9 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
 
     @Override 
     public void update(float tpf) {
+        this.timePerFrame = tpf;
         /* 2) Run Worker Method tasks */
-        executeTasks((float) tpf);
+        executeTasks(tpf);
     }
 
     @Override
@@ -148,9 +138,8 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> void addTask(Method method, WorkerTask<T> task) {
-        tasks.put(method.getName(), (WorkerTask<Object>) task);
+    public void addTask(Method method, WorkerTask task) {
+        tasks.put(method.getName(), task);
     }
 
     @Override
@@ -161,7 +150,7 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
                     continue;
                 }
                 if (!(tasks.get(task) instanceof MonkeyWorkerTask)) {
-                    continue;
+                    throw new IllegalArgumentException("WorkerTasks must be of type: " + MonkeyWorkerTask.class.getName());
                 }
                 MonkeyWorkerTask monkeyTask = (MonkeyWorkerTask) tasks.get(task);
                 /* Invokes and Saves the result of the execution order! */
@@ -174,7 +163,7 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     }
 
     @Override
-    public Map<String, WorkerTask<Object>> getTasks() {
+    public Map<String, WorkerTask> getTasks() {
         return tasks;
     }
 
