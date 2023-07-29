@@ -37,7 +37,7 @@ public final class TestMonkeyTaskManager extends SimpleApplication implements On
 
     protected static final AppThread assetLoaderThread = new AssetLoaderThread();
     protected static final MonkeyTaskExecutorsManager monkeyTaskBinder =
-                                                        new MonkeyTaskExecutorsManager(new TestJectorInheritance());
+                                                        new MonkeyTaskExecutorsManager(new TaskExecutorService());
     protected static final MonkeyTaskExecutor monkeyTaskExecutor =
                                                 new MonkeyTaskExecutor("MonkeyExecutor");
 
@@ -232,7 +232,8 @@ protected static class ApplicationTasks {
 - [x] Single-threaded dependency tasking.
 - [x] Non-threaded tasking.
 - [x] Supports dependency arguments.
-- [x] Supports dependency return objects to the caller (the parent task executor). 
+- [x] Supports dependency return objects to the caller (the parent task executor).
+- [x] Supports OO Polymorphism over the Worker classes (need to add all the workers statically to the TaskExecutorManager). 
 
 ## Featuring the DI pattern: 
 1) Dependencies are defined by some Method objects as Tasks.
