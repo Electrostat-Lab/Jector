@@ -188,6 +188,7 @@ public class TaskExecutorsManager {
      * Binds a worker method to some task executors via {@link WorkerTask}s.
      * 
      * @param clazzes task executors key in the map
+     * @param worker the worker class containing the runnable annotated methods
      * @param method the method to bind
      * @param args the method arguments object
      */
