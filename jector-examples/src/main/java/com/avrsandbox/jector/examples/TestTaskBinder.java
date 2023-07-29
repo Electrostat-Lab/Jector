@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.thread.concurrency.ConcurrentAppThread;
-import com.avrsandbox.jector.core.work.TaskBinder;
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 
 /**
  * A live example for the Jector Framework concurrency model.
@@ -47,7 +47,7 @@ public final class TestTaskBinder {
     private static final AppThread looperThread = new Looper();
     private static final AppThread daemonThread = new Daemon();
     private static final AppThread foregroundThread = new Foreground();
-    private static final TaskBinder taskBinder = new TaskBinder(new TaskExecutorService());
+    private static final TaskExecutorsManager taskExecutorsManager = new TaskExecutorsManager(new TaskExecutorService());
 
     public static void main(String[] args) throws InterruptedException {
         /* 1) Start threads */
@@ -56,21 +56,21 @@ public final class TestTaskBinder {
         foregroundThread.start();
 
         /* 2) Register executors */
-        taskBinder.registerTaskExecutor(daemonThread);
-        taskBinder.registerTaskExecutor(looperThread);
-        taskBinder.registerTaskExecutor(foregroundThread);
+        taskExecutorsManager.registerTaskExecutor(daemonThread);
+        taskExecutorsManager.registerTaskExecutor(looperThread);
+        taskExecutorsManager.registerTaskExecutor(foregroundThread);
 
         /* 3) Binds worker methods to their executors via worker tasks */
-        Map<String, String> methodArgs = new HashMap<>();
+        Map<String, Object> methodArgs = new HashMap<>();
         methodArgs.put("message", "Hello World!");
-        taskBinder.bind(new MethodArguments<String>(methodArgs));
+        taskExecutorsManager.bind(new MethodArguments(methodArgs));
         
         /* 4) Enables executors */
         looperThread.setActive(true);
         daemonThread.setActive(true);
 
         /* 5) Triggers tasks to run */
-        taskBinder.getTaskExecutors()
+        taskExecutorsManager.getTaskExecutors()
                   .get(TestTaskBinder.Daemon.class)
                   .getTasks()
                   .get("writeMessage")
