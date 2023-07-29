@@ -30,7 +30,7 @@
 */
 package com.avrsandbox.jector.examples;
 
-import com.avrsandbox.jector.core.work.TaskBinder;
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.TaskExecutor;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.command.ExecuteOn;
@@ -39,7 +39,7 @@ import com.avrsandbox.jector.core.work.WorkerTask;
 
 /**
  * Provides a worker implementation to inject some callable {@link WorkerTask}s (dependencies)
- * into some registered {@link TaskExecutor}s (dependent objects) using the {@link TaskBinder} api (injector utility).
+ * into some registered {@link TaskExecutor}s (dependent objects) using the {@link TaskExecutorsManager} api (injector utility).
  * 
  * @author pavl_g
  */
@@ -49,7 +49,7 @@ public class TaskExecutorService implements Worker {
      * Writes a message into the task return.
      */
     @ExecuteOn(executors = {TestTaskBinder.Daemon.class})
-    public String writeMessage(MethodArguments<Object> methodArguments, TaskBinder taskBinder) {
+    public String writeMessage(MethodArguments methodArguments, TaskExecutorsManager taskExecutorsManager) {
         try {
             System.out.println("-----------------------------------------------------");
             System.out.println(Thread.currentThread().getName());
@@ -59,7 +59,7 @@ public class TaskExecutorService implements Worker {
             return "Hello Jector!";
         } finally {
             /* 6) Activates concurrent tasks describing Jector concurrency model */
-            taskBinder.getTaskExecutors()
+            taskExecutorsManager.getTaskExecutors()
                       .get(TestTaskBinder.Looper.class)
                       .getTasks()
                       .get("showMessage")
@@ -71,11 +71,11 @@ public class TaskExecutorService implements Worker {
      * Shows a written message from the task return of another executor.
      */
     @ExecuteOn(executors = {TestTaskBinder.Looper.class})
-    public void showMessage(MethodArguments<Object> methodArguments, TaskBinder taskBinder) {
+    public void showMessage(MethodArguments methodArguments, TaskExecutorsManager taskExecutorsManager) {
         System.out.println("-----------------------------------------------------");
         System.out.println(Thread.currentThread().getName());
-        /* Reterieves the writeMessage return value */
-        System.out.println(taskBinder.getTaskExecutors()
+        /* Retrieves the writeMessage return value */
+        System.out.println(taskExecutorsManager.getTaskExecutors()
                                      .get(TestTaskBinder.Daemon.class)
                                      .getTasks()
                                      .get("writeMessage")
