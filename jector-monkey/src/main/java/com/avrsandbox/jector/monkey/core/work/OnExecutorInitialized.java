@@ -31,37 +31,20 @@
 
 package com.avrsandbox.jector.monkey.core.work;
 
-import com.avrsandbox.jector.core.work.WorkerTask;
+import com.jme3.app.Application;
 
 /**
- * A specialized implementation of the jector WorkerTask for jMonkeyEngine
- * supporting time-per-frame monitoring.
+ * Commands and executes a listener when the {@link MonkeyTaskExecutor}
+ * is initialized.
  *
  * @author pavl_g
  */
-public abstract class MonkeyWorkerTask extends WorkerTask {
+public interface OnExecutorInitialized {
 
     /**
-     * Value for time per frame in seconds, this value
-     * is internally synchronized with the JME update thread.
-     */
-    protected float timePerFrame;
-
-    /**
-     * Updates the time-per-frame value (in seconds).
+     * Dispatched when this executor is initialized.
      *
-     * @param timePerFrame the new value (in seconds)
+     * @param application the JME application instance
      */
-    public void setTimePerFrame(float timePerFrame) {
-        this.timePerFrame = timePerFrame;
-    }
-
-    /**
-     * Retrieves the time-per-frame value (in seconds).
-     *
-     * @return the time-per-frame value (in seconds)
-     */
-    public float getTimePerFrame() {
-        return timePerFrame;
-    }
+    void onInitialized(Application application);
 }
