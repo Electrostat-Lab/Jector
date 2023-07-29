@@ -19,6 +19,6 @@ ext_artifactId_release="jector-monkey"
 artifactId_debug="jector-debug"
 
 settings="./helper-scripts/project-impl/publishing/maven-settings.xml"
-build_dir="./jector/build/libs"
+lib_build_dir="./jector/build/libs"
 ext_build_dir="./jector-monkey/build/libs"
 # ---------------------
