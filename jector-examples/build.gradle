@@ -3,7 +3,7 @@ plugins {
 }
 
 application {
-    mainClass = 'com.avrsandbox.jector.examples.TestTaskBinder'
+    mainClass = 'com.avrsandbox.jector.examples.TestTaskExecutorManager'
 }
 
 repositories {
