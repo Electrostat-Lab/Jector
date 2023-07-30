@@ -32,12 +32,12 @@
 package com.avrsandbox.jector.monkey.core.work;
 
 import com.avrsandbox.jector.core.work.TaskExecutor;
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.WorkerTask;
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A base implementation of the jector {@link TaskExecutor}s to a jMonkeyEngine app state.
@@ -45,11 +45,11 @@ import java.util.Map;
  * @author pavl_g
  */
 public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
-    
+
     /**
      * Tasks wrapping the methods to be bound to their specified annotated methods.
      */
-    protected final Map<String, WorkerTask> tasks = new HashMap<>();
+    protected final Map<String, WorkerTask> tasks = new ConcurrentHashMap<>();
 
     /**
      * A flag to order the executor for termination.
@@ -69,7 +69,7 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     /**
      * Provides an interface to command-state the initialization.
      */
-    protected OnExecutorInitialized onInitialized;
+    protected TaskExecutorListeners taskExecutorListeners;
 
     /**
      * Instantiates a new instance of a task executor specialized to run on the JME thread only.
@@ -90,38 +90,47 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     }
 
     /**
-     * Adjusts the initialization listener instance.
+     * Adjusts this task executor listeners.
      *
-     * @param onInitialized the initializer instance
+     * @param taskExecutorListeners a new listener instance
      */
-    public void setOnInitialized(OnExecutorInitialized onInitialized) {
-        this.onInitialized = onInitialized;
+    public void setTaskExecutorListeners(TaskExecutorListeners taskExecutorListeners) {
+        this.taskExecutorListeners = taskExecutorListeners;
     }
 
     @Override
     protected void initialize(Application app) {
-        if (onInitialized != null) {
-            onInitialized.onInitialized(app);
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onExecutorInitialized(app);
         }
     }
 
     @Override
     protected void cleanup(Application app) {
-
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onExecutorCleanUp(app);
+        }
     }
 
     @Override
     protected void onEnable() {
-
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onExecutorEnabled(getApplication());
+        }
     }
 
     @Override
     protected void onDisable() {
-
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onExecutorDisabled(getApplication());
+        }
     }
 
     @Override 
     public void update(float tpf) {
+        if (isTerminated()) {
+            return;
+        }
         this.timePerFrame = tpf;
         /* 2) Run Worker Method tasks */
         executeTasks(tpf);
@@ -138,15 +147,31 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     }
 
     @Override
-    public void addTask(Method method, WorkerTask task) {
-        tasks.put(method.getName(), task);
+    public void startExecutorService(TaskExecutorsManager taskExecutorsManager) {
+        assert taskExecutorsManager instanceof MonkeyTaskExecutorsManager;
+        ((MonkeyTaskExecutorsManager) taskExecutorsManager)
+                .getApplication().getStateManager().attach(this);
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onStartExecutorService();
+        }
+    }
+
+    @Override
+    public void destructExecutorService(TaskExecutorsManager taskExecutorsManager) {
+        this.terminate = true;
+        setActive(false);
+        getStateManager().detach(this);
+        TaskExecutor.super.destructExecutorService(taskExecutorsManager);
+        if (taskExecutorListeners != null) {
+            taskExecutorListeners.onDestructExecutorService();
+        }
     }
 
     @Override
     public void executeTasks(Object arguments) {
         try {
             for (String task : tasks.keySet()) {
-                if (!tasks.get(task).isActive()) {
+                if (tasks.get(task) == null || !tasks.get(task).isActive()) {
                     continue;
                 }
                 if (!(tasks.get(task) instanceof MonkeyWorkerTask)) {
@@ -165,12 +190,6 @@ public class MonkeyTaskExecutor extends BaseAppState implements TaskExecutor {
     @Override
     public Map<String, WorkerTask> getTasks() {
         return tasks;
-    }
-
-    @Override
-    public void terminate() {
-        getStateManager().detach(this);
-        this.terminate = true;
     }
 
     @Override

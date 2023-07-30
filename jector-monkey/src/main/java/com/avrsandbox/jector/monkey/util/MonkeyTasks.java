@@ -50,16 +50,16 @@ public final class MonkeyTasks {
     }
 
     /**
-     * Retrieves the JME task executor by its class-name.
+     * Retrieves a JME task executor by its name.
      *
-     * @param taskExecutorsManager the manager holding the registered executors
-     * @param clazz the class-instance of the task executor to retrieve
-     * @return the matching JME task executor
+     * @param taskExecutorsManager the manager holding the registered executors (non-nullable)
+     * @param executor the name of the task-executor (as registered) to retrieve (non-nullable)
+     * @return the matching JME task executor (non-nullable)
      */
     public static MonkeyTaskExecutor getTaskExecutor(TaskExecutorsManager taskExecutorsManager,
-                                                     Class<? extends MonkeyTaskExecutor> clazz) {
+                                                     String executor) {
         return ((MonkeyTaskExecutor) Tasks
-                .getTaskExecutorFromTaskBinder(taskExecutorsManager, clazz));
+                .getTaskExecutorFromTaskBinder(taskExecutorsManager, executor));
     }
 
     /**
@@ -67,57 +67,63 @@ public final class MonkeyTasks {
      * worker task is the same as its corresponding annotated worker method.
      *
      * @param taskExecutorsManager the manager holding the registered executors
-     * @param clazz the class-instance of the task executor holding the target worker task
-     * @param name the worker task name, and it's the same as its counterpart method name
-     * @return a reference to the JME worker task defined by the "name"
+     * @param executor the name of the task-executor (as registered) (non-nullable)
+     * @param task the name of the task to retrieve (usually the name of the worker method) (non-nullable)
+     * @return a reference to the JME worker task (non-nullable)
      */
     public static MonkeyWorkerTask getWorkerTask(TaskExecutorsManager taskExecutorsManager,
-                                                 Class<? extends MonkeyTaskExecutor> clazz,
-                                                 String name) {
-        return ((MonkeyWorkerTask) Tasks.getWorkerTask(taskExecutorsManager, clazz, name));
+                                                 String executor,
+                                                 String task) {
+        return ((MonkeyWorkerTask) Tasks.getWorkerTask(taskExecutorsManager, executor, task));
     }
 
     /**
      * Retrieves the JME application instance, the app instance could by fetched from any JME
      * task executor.
      *
-     * @param taskExecutorsManager the manager holding the registered executors
-     * @param clazz the class-instance of any registered JME task executor
-     * @return a reference to the application instance
+     * @param taskExecutorsManager the manager holding the registered executors (of {@link MonkeyTaskExecutorsManager} type)
+     * @param executor the name of the task-executor (as registered) (non-nullable)
+     * @return a reference to the application instance (non-nullable)
+     * @throws IllegalArgumentException if the taskExecutorsManager is not of type MonkeyTaskExecutorsManager
+     * @throws IllegalStateException if the JME-3 application instance is null
      */
     public static SimpleApplication getApplication(TaskExecutorsManager taskExecutorsManager,
-                                                   Class<? extends MonkeyTaskExecutor> clazz) {
+                                                   String executor) {
         if (!(taskExecutorsManager instanceof MonkeyTaskExecutorsManager)) {
             throw new IllegalArgumentException("Cannot retrieve a JME App Instance from non-application executors!");
         }
-        return (SimpleApplication) MonkeyTasks.getTaskExecutor(taskExecutorsManager, clazz).getApplication();
+        SimpleApplication application = (SimpleApplication) MonkeyTasks.getTaskExecutor(taskExecutorsManager, executor).getApplication();
+        if (application == null) {
+            throw new IllegalStateException("JME-3 App instance cannot be null!");
+        }
+        return application;
     }
 
     /**
      * Retrieves the application time-per-frame as monitored by a registered
      * JME task executor.
      *
-     * @param taskExecutorsManager the manager holding the registered executors
-     * @param clazz the class-instance of any registered JME task executor
+     * @param taskExecutorsManager the manager holding the registered executors (non-nullable)
+     * @param executor the name of the task-executor (as registered) (non-nullable)
      * @return a reference to the application tpf value
      */
     public static float getApplicationTimePerFrame(TaskExecutorsManager taskExecutorsManager,
-                                                   Class<? extends MonkeyTaskExecutor> clazz) {
-        return MonkeyTasks.getTaskExecutor(taskExecutorsManager, clazz).getTimePerFrame();
+                                                   String executor) {
+        return MonkeyTasks.getTaskExecutor(taskExecutorsManager, executor).getTimePerFrame();
     }
 
     /**
      * Retrieves the application time-per-frame as monitored by a JME
      * worker task.
      *
-     * @param taskExecutorsManager the manager holding the registered executors
-     * @param clazz the class-instance of any registered JME task executor
-     * @param name the name of the JME worker task to retrieve its tpf value
+     * @param taskExecutorsManager the manager holding the registered executors (non-nullable)
+     * @param executor the name of the task-executor (as registered) (non-nullable)
+     * @param task the name of the JME worker task to retrieve its tpf value (non-nullable)
      * @return the value of the tpf as monitored by the specified JME worker task
      */
     public static float getWorkerTaskTimePerFrame(TaskExecutorsManager taskExecutorsManager,
-                                                  Class<? extends MonkeyTaskExecutor> clazz,
-                                                  String name) {
-        return MonkeyTasks.getWorkerTask(taskExecutorsManager, clazz, name).getTimePerFrame();
+                                                  String executor,
+                                                  String task) {
+        return MonkeyTasks.getWorkerTask(taskExecutorsManager, executor, task).getTimePerFrame();
     }
 }
