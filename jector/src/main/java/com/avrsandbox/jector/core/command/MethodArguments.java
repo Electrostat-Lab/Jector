@@ -31,9 +31,8 @@
 package com.avrsandbox.jector.core.command;
 
 import com.avrsandbox.jector.core.work.TaskExecutorsManager;
-
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents generic method arguments for an annotated method with
@@ -44,7 +43,7 @@ import java.util.Map;
 public class MethodArguments {
 
     /**
-     * An array of generic objects to be passed to the bound method.
+     * A map of generic objects to be passed to the bound method.
      */
     protected Map<String, Object> args;
 
@@ -52,33 +51,33 @@ public class MethodArguments {
      * For empty initialization.
      */
     public MethodArguments() {
-        this.args = new HashMap<>();
+        this.args = new ConcurrentHashMap<>();
     }
 
     /**
-     * Instantiates a method args object that wraps an array of generified objects.
+     * Instantiates a method args object that wraps a map of objects.
      * 
-     * @param args an array of generified objects
+     * @param args a map of objects representing the method parameters
      */
     public MethodArguments(Map<String, Object> args) {
         this.args = args;
     }
 
     /**
-     * Retrieves the generified arguments, use this method inside your 
+     * Retrieves the map of arguments, use this method inside your
      * bound method (injected dependency) to fetch the arguments passed from the 
      * {@link TaskExecutorsManager} instance (the injector instance).
      * 
-     * @return an array of generified objects
+     * @return a map of objects representing the method parameters
      */
     public Map<String, Object> getArgs() {
         return args;
     }
 
     /**
-     * Sets the args generified object array.
+     * Sets the map reference to a new instance.
      * 
-     * @param args the new array object
+     * @param args the new map object
      */
     public void setArgs(Map<String, Object> args) {
         this.args = args;
