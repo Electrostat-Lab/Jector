@@ -48,15 +48,15 @@ import java.lang.annotation.Retention;
 public @interface ExecuteOn {
     
     /**
-     * Specifies which objects will execute those annotated methods, methods 
+     * Specifies which {@link TaskExecutor}s will execute those annotated methods, methods
      * are bound to their executors via a {@link TaskExecutorsManager} instance.
      * 
      * <p>
      * 
-     * TaskExecutors specified must be registered using {@link TaskExecutorsManager#registerTaskExecutor(TaskExecutor)}
+     * TaskExecutors specified must be registered using {@link TaskExecutorsManager#registerTaskExecutor(String, TaskExecutor)}
      * before being able to receive annotated methods.
      * 
-     * @return an array of classes representing the registered task executors
+     * @return an array of task-executors name representing the registered task-executors
      */
-    Class<? extends TaskExecutor>[] executors();
+    String[] executors();
 }
