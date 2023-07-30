@@ -47,8 +47,40 @@ public interface TaskExecutor {
      *  
      * @param method the method signifying this task
      * @param task a task instance
+     * @throws IllegalStateException if this executor has a nullary worker-tasks map
+     * @throws IllegalArgumentException if at least either of the method arguments is null
      */
-    void addTask(Method method, WorkerTask task);
+    default void addTask(Method method, WorkerTask task) {
+        if (getTasks() == null) {
+            throw new IllegalStateException("Nullary WorkerTasks map is not allowed!");
+        }
+        if (method == null || task == null) {
+            throw new IllegalArgumentException("Cannot add nullary worker tasks!");
+        }
+        getTasks().put(method.getName(), task);
+    }
+
+    /**
+     * Dispatched when an implementation of this executor is
+     * registered to a {@link TaskExecutorsManager}.
+     *
+     * @param taskExecutorsManager the task-executors manager instance
+     */
+    void startExecutorService(TaskExecutorsManager taskExecutorsManager);
+
+    /**
+     * Dispatched when a registered task executor is
+     * unregistered to a {@link TaskExecutorsManager}.
+     *
+     * @param taskExecutorsManager the task executor manager instance
+     * @throws IllegalStateException if this executor has a nullary worker-tasks map
+     */
+    default void destructExecutorService(TaskExecutorsManager taskExecutorsManager) {
+        if (getTasks() == null) {
+            throw new IllegalStateException("Nullary WorkerTasks map is not allowed!");
+        }
+        getTasks().clear();
+    }
 
     /**
      * Runs the tasks in synchrony with some arguments.
@@ -56,11 +88,6 @@ public interface TaskExecutor {
      * @param arguments object args
      */
     void executeTasks(Object arguments);
-
-    /**
-     * Terminates this task executor. 
-     */
-    void terminate();
 
     /**
      * Tests whether this task executor has been terminated.

@@ -38,31 +38,31 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.IllegalAccessException;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A bridging API that binds annotated {@link ExecuteOn} methods in a {@link Worker} as 
  * {@link WorkerTask}s to be executed on the registered {@link TaskExecutor}s.
  *
- * <p> Each TaskBinder instance has its own {@link Worker} implementation, all the {@link ExecuteOn} annotated
- * methods should be in an object of type {@link Worker} to be executed on the specified {@link TaskExecutor}.
+ * <p> Each TaskExecutorManager instance has its own {@link Worker}s implementation, all the {@link ExecuteOn} annotated
+ * methods should be in an object of type {@link Worker} to be executed on the declared {@link TaskExecutor}.
  * 
  * @author pavl_g
  */
 public class TaskExecutorsManager {
 
     /**
-     * The associated worker implementation.
+     * The associated workers implementation.
      */
     protected Worker[] workers;
 
     /**
-     * A map holding the registered task executors.
+     * A thread-safe modifiable map holding the registered task executors.
      */
-    protected HashMap<Class<? extends TaskExecutor>, TaskExecutor> taskExecutors = new HashMap<>();
+    protected Map<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<>();
 
     /**
-     * Instantiates a task binder instance with a single worker implementations.
+     * Instantiates an executors manager with a single worker implementation.
      *
      * @param worker an instance of worker
      */
@@ -71,7 +71,7 @@ public class TaskExecutorsManager {
     }
 
     /**
-     * Instantiates a task binder instance with workers implementations.
+     * Instantiates an executors manager with workers implementations.
      * 
      * @param workers an array of the worker instances
      */
@@ -80,59 +80,60 @@ public class TaskExecutorsManager {
     }
 
     /**
-     * Registers a new instance of task executor, replacing the old 
-     * executor if called multiple times.
-     * 
+     * Registers an instance of task executor invoking the {@link TaskExecutor#startExecutorService(TaskExecutorsManager)}.
+     *
+     * @param name the name of the task executor to register in string format
      * @param taskExecutor an instance of the TaskExecutor to execute annotated worker methods
+     * @throws IllegalArgumentException if invoked more than once on the same task executor object
      */
-    public void registerTaskExecutor(TaskExecutor taskExecutor) {
-        taskExecutors.put(taskExecutor.getClass(), taskExecutor);
+    public void registerTaskExecutor(String name, TaskExecutor taskExecutor) {
+        if (taskExecutors.get(name) == taskExecutor) {
+            throw new IllegalArgumentException("TaskExecutor is already registered!");
+        }
+        taskExecutors.put(name, taskExecutor);
+        taskExecutor.startExecutorService(this);
     }
 
     /**
-     * Creates a new instance of the {@link TaskExecutor}
-     * and adds it to the map of the registered executors replacing 
-     * the old instance if called multiple times.
-     * 
+     * Creates and registers a new instance of the {@link TaskExecutor} invoking
+     * {@link TaskExecutor#startExecutorService(TaskExecutorsManager)}.
+     *
+     * @param name the name of the task executor to register in string format
      * @param clazz a class of type TaskExecutor
      * @throws InstantiationException if the class that declares the underlying constructor represents an abstract class
      * @throws IllegalAccessException if this Constructor object is enforcing Java language access control and the underlying constructor is inaccessible
      * @throws NoSuchMethodException thrown when a particular constructor cannot be found
      * @throws InvocationTargetException if the underlying constructor throws an exception (checked)
      */
-    public void registerTaskExecutor(Class<? extends TaskExecutor> clazz) 
+    public void registerTaskExecutor(String name, Class<? extends TaskExecutor> clazz)
                 throws InstantiationException, IllegalAccessException, 
                        NoSuchMethodException, InvocationTargetException {
-        registerTaskExecutor(clazz.getDeclaredConstructor().newInstance());
+        registerTaskExecutor(name, clazz.getDeclaredConstructor().newInstance());
     }
 
     /**
-     * Unregisters a task executor.
-     * 
-     * @param taskExecutor a task executor instance to un-register
+     * Unregisters a task executor invoking the {@link TaskExecutor#destructExecutorService(TaskExecutorsManager)}.
+     *
+     * @param name the name of the task executor to unregister in string format
+     * @throws IllegalArgumentException if the task executor is not found
      */
-    public void unregisterTaskExecutor(TaskExecutor taskExecutor) {
-        unregisterTaskExecutor(taskExecutor.getClass());
+    public void unregisterTaskExecutor(String name) {
+        if (taskExecutors.get(name) == null) {
+            throw new IllegalArgumentException(name + " TaskExecutor is not found!");
+        }
+        taskExecutors.get(name).destructExecutorService(this);
+        taskExecutors.remove(name);
     }
 
     /**
-     * Unregisters a task executor directly using its class object.
-     * 
-     * @param clazz the class object of the task executor to be unregistered
-     */
-    public void unregisterTaskExecutor(Class<? extends TaskExecutor> clazz) {
-        taskExecutors.remove(clazz);
-    }
-
-    /**
-     * Binds worker methods to their executor instances via WorkerTasks.
+     * Binds worker methods to their executor instances via {@link WorkerTask}s.
      */
     public void bind() {
         bind(null);
     }
 
     /**
-     * Binds worker methods to their executor instances via WorkerTasks.
+     * Binds worker methods to their executor instances via {@link WorkerTask}s.
      * 
      * @param methodArguments a data structure representing a wrapper for methods arguments passed to the 
      *                        methods to be executed
@@ -160,14 +161,14 @@ public class TaskExecutorsManager {
      * 
      * @return a map of the registered task executors
      */
-    public Map<Class<? extends TaskExecutor>, TaskExecutor> getTaskExecutors() {
+    public Map<String, TaskExecutor> getTaskExecutors() {
         return taskExecutors;
     }
 
     /**
-     * Sets the worker instance associated with this task binder, if this
+     * Sets the worker instance associated with this instance, if this
      * setter is invoked before calling {@link TaskExecutorsManager#bind(MethodArguments)},
-     * then dependency injection will be redirected from this new worker implementation.
+     * then dependency injection will be redirected from those new workers implementation.
      * 
      * @param workers a new workers array
      */
@@ -176,7 +177,7 @@ public class TaskExecutorsManager {
     }
 
     /**
-     * Retrieves the worker instance associated with this binder.
+     * Retrieves the worker instance associated with this instance.
      * 
      * @return an instance of the worker interface
      */
@@ -187,20 +188,16 @@ public class TaskExecutorsManager {
     /**
      * Binds a worker method to some task executors via {@link WorkerTask}s.
      * 
-     * @param clazzes task executors key in the map
+     * @param executors task executors key in the map
      * @param worker the worker class containing the runnable annotated methods
      * @param method the method to bind
      * @param args the method arguments object
      */
-    protected void bind(Class<? extends TaskExecutor>[] clazzes, Worker worker, Method method,
+    protected void bind(String[] executors, Worker worker, Method method,
                                                MethodArguments args) {
-        for (Class<? extends TaskExecutor> clazz : clazzes) {
+        for (String executorName : executors) {
             /* Submits a task on the specified executor */
-            TaskExecutor taskExecutor = taskExecutors.get(clazz);
-            /* Sanity check the executor Object */
-            if (taskExecutor == null) {
-                continue;
-            }
+            TaskExecutor taskExecutor = taskExecutors.get(executorName);
             bind(taskExecutor, worker, method, args);
         }
     }

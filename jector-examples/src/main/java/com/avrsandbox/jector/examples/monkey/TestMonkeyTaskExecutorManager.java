@@ -33,10 +33,9 @@ package com.avrsandbox.jector.examples.monkey;
 
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.thread.AppThread;
-import com.avrsandbox.jector.core.thread.concurrency.ConcurrentAppThread;
 import com.avrsandbox.jector.monkey.core.work.MonkeyTaskExecutorsManager;
 import com.avrsandbox.jector.monkey.core.work.MonkeyTaskExecutor;
-import com.avrsandbox.jector.monkey.core.work.OnExecutorInitialized;
+import com.avrsandbox.jector.monkey.core.work.TaskExecutorListeners;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.system.AppSettings;
@@ -46,11 +45,13 @@ import com.jme3.system.AppSettings;
  *
  * @author pavl_g
  */
-public final class TestMonkeyTaskBinder extends SimpleApplication implements OnExecutorInitialized {
+public final class TestMonkeyTaskBinder extends SimpleApplication implements TaskExecutorListeners {
 
-    protected static final AppThread assetLoaderThread = new AssetLoaderThread();
-    protected static final MonkeyTaskExecutorsManager monkeyTaskBinder = new MonkeyTaskExecutorsManager(new TestJectorInheritance());
-    protected static final MonkeyTaskExecutor monkeyTaskExecutor = new MonkeyTaskExecutor("MonkeyExecutor");
+    protected final AppThread assetLoaderThread = new AssetLoaderThread();
+    protected MonkeyTaskExecutorsManager monkeyTaskBinder;
+    protected final MonkeyTaskExecutor monkeyTaskExecutor = new MonkeyTaskExecutor("MonkeyExecutor");
+    protected static final String JME_EXECUTOR = "JME_EXECUTOR";
+    protected static final String ASSET_LOADER = "ASSET_LOADER";
 
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
@@ -62,15 +63,15 @@ public final class TestMonkeyTaskBinder extends SimpleApplication implements OnE
 
     @Override
     public void simpleInitApp() {
-        assetLoaderThread.start();
+        monkeyTaskBinder = new MonkeyTaskExecutorsManager(new TestJectorInheritance(), TestMonkeyTaskBinder.this);
 
-        monkeyTaskBinder.registerTaskExecutor(assetLoaderThread);
-        monkeyTaskBinder.registerTaskExecutor(monkeyTaskExecutor);
+        monkeyTaskBinder.registerTaskExecutor(ASSET_LOADER, assetLoaderThread);
+        monkeyTaskBinder.registerTaskExecutor(JME_EXECUTOR, monkeyTaskExecutor);
+        monkeyTaskBinder.registerTaskExecutor(JME_EXECUTOR, monkeyTaskExecutor);
 
         assetLoaderThread.setActive(true);
         monkeyTaskExecutor.setActive(true);
-        monkeyTaskExecutor.setOnInitialized(this);
-        stateManager.attach(monkeyTaskExecutor);
+        monkeyTaskExecutor.setTaskExecutorListeners(this);
     }
 
     @Override
@@ -78,19 +79,44 @@ public final class TestMonkeyTaskBinder extends SimpleApplication implements OnE
     }
 
     @Override
-    public void onInitialized(Application application) {
+    public void onExecutorInitialized(Application app) {
         monkeyTaskBinder.bind(new MethodArguments());
         monkeyTaskBinder.getTaskExecutors()
-                .get(AssetLoaderThread.class)
+                .get(ASSET_LOADER)
                 .getTasks()
                 .get("setupSky")
                 .setActive(true);
     }
 
+    @Override
+    public void onStartExecutorService() {
+
+    }
+
+    @Override
+    public void onStopExecutorService() {
+
+    }
+
+    @Override
+    public void onExecutorCleanUp(Application app) {
+
+    }
+
+    @Override
+    public void onExecutorEnabled(Application app) {
+
+    }
+
+    @Override
+    public void onExecutorDisabled(Application app) {
+
+    }
+
     /**
      * An internal daemon thread for async heavy duty asset loading.
      */
-    public static class AssetLoaderThread extends ConcurrentAppThread {
+    public static class AssetLoaderThread extends AppThread {
         public AssetLoaderThread() {
             super(AssetLoaderThread.class.getName());
             setDaemon(true);

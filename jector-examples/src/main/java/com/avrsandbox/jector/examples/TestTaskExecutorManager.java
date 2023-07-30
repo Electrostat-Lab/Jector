@@ -34,7 +34,6 @@ import com.avrsandbox.jector.core.thread.AppThread;
 import java.util.HashMap;
 import java.util.Map;
 import com.avrsandbox.jector.core.command.MethodArguments;
-import com.avrsandbox.jector.core.thread.concurrency.ConcurrentAppThread;
 import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 
 /**
@@ -48,6 +47,9 @@ public final class TestTaskBinder {
     private static final AppThread daemonThread = new Daemon();
     private static final AppThread foregroundThread = new Foreground();
     private static final TaskExecutorsManager taskExecutorsManager = new TaskExecutorsManager(new TaskExecutorService());
+    protected static final String DAEMON_THREAD = "DAEMON_THREAD";
+    protected static final String LOOPER_THREAD = "LOOPER_THREAD";
+    protected static final String FOREGROUND_THREAD = "FOREGROUND_THREAD";
 
     public static void main(String[] args) throws InterruptedException {
         /* 1) Start threads */
@@ -56,9 +58,9 @@ public final class TestTaskBinder {
         foregroundThread.start();
 
         /* 2) Register executors */
-        taskExecutorsManager.registerTaskExecutor(daemonThread);
-        taskExecutorsManager.registerTaskExecutor(looperThread);
-        taskExecutorsManager.registerTaskExecutor(foregroundThread);
+        taskExecutorsManager.registerTaskExecutor(DAEMON_THREAD, daemonThread);
+        taskExecutorsManager.registerTaskExecutor(LOOPER_THREAD, looperThread);
+        taskExecutorsManager.registerTaskExecutor(FOREGROUND_THREAD, foregroundThread);
 
         /* 3) Binds worker methods to their executors via worker tasks */
         Map<String, Object> methodArgs = new HashMap<>();
@@ -71,27 +73,27 @@ public final class TestTaskBinder {
 
         /* 5) Triggers tasks to run */
         taskExecutorsManager.getTaskExecutors()
-                  .get(TestTaskBinder.Daemon.class)
+                  .get(DAEMON_THREAD)
                   .getTasks()
                   .get("writeMessage")
                   .setActive(true);
     }
 
-    public static class Looper extends ConcurrentAppThread {
+    public static class Looper extends AppThread {
         public Looper() {
             super(Looper.class.getName());
             setDaemon(false);
         }
     }
     
-    public static class Daemon extends ConcurrentAppThread {
+    public static class Daemon extends AppThread {
         public Daemon() {
             super(Daemon.class.getName());
             setDaemon(true);
         }
     }
 
-    public static class Foreground extends ConcurrentAppThread {
+    public static class Foreground extends AppThread {
         public Foreground() {
             super(Foreground.class.getName());
             setDaemon(true);
