@@ -8,7 +8,10 @@ An advanced DI framework for JVM and Android applications based on the Java Refl
 ┌─[pavl-machine@pavl-machine]─[/home/twisted/GradleProjects/Jector]
 └──╼ $./gradlew :jector:build && \
       ./gradlew :jector:generateSourcesJar && \
-      ./gradlew :jector:generateJavadocJar
+      ./gradlew :jector:generateJavadocJar && \
+      ./gradlew :jector-monkey build && \
+      ./gradlew :jector-monkey generateSourcesJar && \
+      ./gradlew :jector-monkey generateJavadocJar
 ```
 
 ## Quick Testing:
@@ -39,14 +42,15 @@ dependencies {
 - [x] Non-threaded tasking.
 - [x] Supports dependency arguments.
 - [x] Supports dependency return objects to the caller (the parent task executor).
-- [x] Supports OO Polymorphism over the Worker classes (need to add all the workers statically to the TaskExecutorManager). 
+- [x] Supports OO Polymorphism over the Worker classes (need to add all the workers statically to the TaskExecutorManager).
+- [x] Supports Android and jMonkeyEngine Applications.
 
 ## Featuring the DI pattern: 
-1) Dependencies are defined by some Method objects as Tasks.
+1) Dependencies are defined by some Method objects as `WorkerTasks`.
 2) Dependencies created from Worker Method objects only.
 3) Dependencies are bound to their Executors (threads, states, ...) interfaces via WorkerTasks (which enclose those low-level worker Methods).
 4) Dependencies could be only instantiated from Worker Methods (annotated methods inside Worker classes).
-5) A Worker interface is a marker interface for the Jector Framework.
-6) A Worker implementation signifies a runtime environment for the DI actions.
-7) A TaskBinder implementation has a Worker instance and is the injector object that creates WorkerTasks from Worker Methods and injects them into annotated TaskExecutors.
-8) A TaskExecutor implementation is a wrapper to a collection of WorkerTasks to be executed, TaskExecutor could be a State, a Thread, a Server Container,...etc.
+5) A `Worker` interface is a marker interface for the Jector Framework.
+6) A `Worker` implementation signifies a runtime environment for the DI actions.
+7) A `TaskExecutorManager` implementation has a Worker instance and is the injector object that creates WorkerTasks from Worker Methods and injects them into annotated TaskExecutors.
+8) A `TaskExecutor` implementation is a wrapper to a collection of WorkerTasks to be executed, TaskExecutor could be a State, a Thread, a Server Container,...etc.
