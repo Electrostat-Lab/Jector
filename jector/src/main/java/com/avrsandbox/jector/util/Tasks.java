@@ -47,47 +47,58 @@ public final class Tasks {
     }
 
     /**
-     * Retrieves a registered task executor from its task binder instance.
+     * Retrieves a registered task-executor from its task binder instance.
      *
-     * @param taskExecutorsManager the manager instance holding the TaskExecutors
-     * @param clazz the represented executor to retrieve
-     * @return the executor object registered to this task binder
+     * @param taskExecutorsManager the manager instance holding the TaskExecutors (non-nullable)
+     * @param executor the represented executor to retrieve (non-nullable)
+     * @return the executor object registered to this task manager (non-nullable)
+     * @throws IllegalStateException if the task-executor is not found
      */
     public static TaskExecutor getTaskExecutorFromTaskBinder(TaskExecutorsManager taskExecutorsManager,
-                                                             Class<? extends TaskExecutor> clazz) {
-        return taskExecutorsManager.getTaskExecutors()
-                .get(clazz);
+                                                             String executor) {
+        TaskExecutor taskExecutor = taskExecutorsManager.getTaskExecutors()
+                                                        .get(executor);
+        if (taskExecutor == null) {
+            throw new IllegalStateException(executor + " TaskExecutor is not found!");
+        }
+        return taskExecutor;
     }
 
     /**
-     * Retrieves a worker task from its task executor object (which is registered to
-     * a task binder).
+     * Retrieves a worker task from its task-executor object (which is registered to
+     * a task-manager).
      *
-     * @param taskExecutorsManager the manager instance holding the TaskExecutors
-     * @param clazz the represented executor holding the task to retrieve
-     * @param name the name of the task to retrieve (usually the name of the worker method)
-     * @return the executor object registered to this task binder
+     * @param taskExecutorsManager the manager instance holding the TaskExecutors (non-nullable)
+     * @param executor the represented executor holding the task to retrieve (non-nullable)
+     * @param task the name of the task to retrieve (usually the name of the worker method) (non-nullable)
+     * @return the executor object registered to this task-manager
+     * @throws IllegalStateException if the worker-task to retrieve is not found
      */
     public static WorkerTask getWorkerTask(TaskExecutorsManager taskExecutorsManager,
-                                           Class<? extends TaskExecutor> clazz,
-                                           String name) {
-        return getTaskExecutorFromTaskBinder(taskExecutorsManager, clazz).getTasks()
-                .get(name);
+                                           String executor,
+                                           String task) {
+        WorkerTask workerTask = getTaskExecutorFromTaskBinder(taskExecutorsManager, executor).getTasks()
+                                        .get(task);
+        if (workerTask == null) {
+            throw new IllegalStateException(task + " WorkerTask is not found!");
+        }
+
+        return workerTask;
     }
 
     /**
-     * Retrieves a worker task return value from its task executor object (which is registered to
-     * a task binder).
+     * Retrieves a worker task return value from its task-executor object (which is registered to
+     * a task-manager).
      *
      * @param <T> a method generic to avoid further dynamic casting
      * @param taskExecutorsManager the manager instance holding the TaskExecutors
-     * @param clazz the represented executor holding the task to retrieve
-     * @param name the name of the task to retrieve (usually the name of the worker method)
-     * @return the return value of the retrieved task from its executor
+     * @param executor the represented executor holding the task to retrieve
+     * @param task the name of the task to retrieve (usually the name of the worker method)
+     * @return the return value of the retrieved task from its executor (nullable)
      */
     public static <T> T getWorkerTaskResult(TaskExecutorsManager taskExecutorsManager,
-                                            Class<? extends TaskExecutor> clazz,
-                                            String name) {
-        return (T) getWorkerTask(taskExecutorsManager, clazz, name).getResult();
+                                            String executor,
+                                            String task) {
+        return (T) getWorkerTask(taskExecutorsManager, executor, task).getResult();
     }
 }

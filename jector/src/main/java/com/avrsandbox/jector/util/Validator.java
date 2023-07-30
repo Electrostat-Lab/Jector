@@ -51,7 +51,7 @@ public final class Validator {
     /**
      * Validates a method's parameters length against a particular number.
      * 
-     * @param method the method to validate its paramters
+     * @param method the method to validate its parameters
      * @param length the number to validate against
      * @throws IllegalArgumentException if the validation fails to meet the criterion
      */
@@ -87,7 +87,7 @@ public final class Validator {
      * 
      * @param methodParams the method parameters
      * @param inputParams the user-input parameters to validate against
-     * @throws IllegalArgumentException if the count of input parameters does not match the count of the method paramters
+     * @throws IllegalArgumentException if the count of input parameters does not match the count of the method parameters
      */
     public static void validateNumberOfArgs(Parameter[] methodParams, Object[] inputParams) 
                                                           throws IllegalArgumentException {
