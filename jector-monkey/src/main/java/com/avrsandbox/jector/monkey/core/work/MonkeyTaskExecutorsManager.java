@@ -35,6 +35,7 @@ import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.Worker;
 import com.avrsandbox.jector.core.work.*;
+import com.jme3.app.Application;
 import java.lang.reflect.Method;
 
 /**
@@ -45,12 +46,17 @@ import java.lang.reflect.Method;
 public class MonkeyTaskExecutorsManager extends TaskExecutorsManager {
 
     /**
+     * The JME3 application instance reference
+     */
+    protected final Application application;
+
+    /**
      * Instantiates a JME task binder with a single worker instance.
      *
      * @param worker the worker instance holding the worker methods to be executed
      */
-    public MonkeyTaskExecutorsManager(Worker worker) {
-        super(worker);
+    public MonkeyTaskExecutorsManager(Worker worker, Application application) {
+        this(new Worker[]{ worker }, application);
     }
 
     /**
@@ -58,13 +64,24 @@ public class MonkeyTaskExecutorsManager extends TaskExecutorsManager {
      *
      * @param workers an array of worker instances
      */
-    public MonkeyTaskExecutorsManager(Worker[] workers) {
+    public MonkeyTaskExecutorsManager(Worker[] workers, Application application) {
         super(workers);
+        this.application = application;
+    }
+
+    /**
+     * Retrieves the JME-3 application instance this manager is attached to.
+     *
+     * @return a reference to the JME-3 application instance
+     */
+    public Application getApplication() {
+        return application;
     }
 
     @Override
     public void bind(MethodArguments methodArguments) {
-        if (!Thread.currentThread().getName().equals("jME3 Main")) {
+        String currentThread = Thread.currentThread().getName();
+        if (!(currentThread.equals("jME3 Main") || currentThread.equals("jME3 Headless Main"))) {
             throw new IllegalStateException("Cannot bind on a non-application thread!");
         }
         super.bind(methodArguments);
