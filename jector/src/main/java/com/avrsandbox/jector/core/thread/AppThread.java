@@ -31,28 +31,28 @@
 
 package com.avrsandbox.jector.core.thread;
 
+import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.WorkerTask;
 import com.avrsandbox.jector.core.work.TaskExecutor;
-import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Represents the base implementation of a task executor that provides the thread-based implementation, the dependent (receiver)
  * object in this DI framework.
  * 
  * <p> Annotated methods with {@link com.avrsandbox.jector.core.command.ExecuteOn} inside a {@link com.avrsandbox.jector.core.work.Worker}
- * are submitted as tasks to be executed on the specified implementations of the {@link com.avrsandbox.jector.core.work.TaskExecutor}, the implementations classes are 
- * specified by annotating them in the array {@link com.avrsandbox.jector.core.command.ExecuteOn#executors()}.
+ * are submitted as {@link WorkerTask}s to be executed on the specified implementations of the {@link com.avrsandbox.jector.core.work.TaskExecutor},
+ * the task executors are specified by annotating their names in the array {@link com.avrsandbox.jector.core.command.ExecuteOn#executors()}.
  *
  * @author pavl_g
  */
 public class AppThread extends Thread implements TaskExecutor {
 
     /**
-     * Tasks wrapping the methods to be bound to their specified annotated methods.
+     * A Thread-Safe modifiable map of tasks wrapping the methods to be bound to their specified annotated methods.
      */
-    protected final Map<String, WorkerTask> tasks = new HashMap<>();
+    protected final Map<String, WorkerTask> tasks = new ConcurrentHashMap<>();
 
     /**
      * A flag to order the executor for termination.
@@ -79,7 +79,7 @@ public class AppThread extends Thread implements TaskExecutor {
             if (!isActive()) {
                 continue;
             }
-            executeTasks(isTerminated());
+            executeTasks(0);
         }
     }
 
@@ -94,15 +94,22 @@ public class AppThread extends Thread implements TaskExecutor {
     }
 
     @Override
-    public void addTask(Method method, WorkerTask task) {
-        tasks.put(method.getName(), task);
+    public void startExecutorService(TaskExecutorsManager taskExecutorsManager) {
+        start();
+    }
+
+    @Override
+    public void destructExecutorService(TaskExecutorsManager taskExecutorsManager) {
+        this.terminate = true;
+        setActive(false);
+        TaskExecutor.super.destructExecutorService(taskExecutorsManager);
     }
 
     @Override
     public void executeTasks(Object arguments) {
         try {
             for (String task : tasks.keySet()) {
-                if (!tasks.get(task).isActive()) {
+                if (tasks.get(task) == null || !tasks.get(task).isActive()) {
                     continue;
                 }
                 /* Saves the result of the execution order! */
@@ -118,11 +125,6 @@ public class AppThread extends Thread implements TaskExecutor {
     @Override
     public Map<String, WorkerTask> getTasks() {
         return tasks;
-    }
-
-    @Override
-    public void terminate() {
-        this.terminate = true;
     }
 
     @Override
