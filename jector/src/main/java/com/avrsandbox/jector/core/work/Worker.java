@@ -32,7 +32,7 @@
 package com.avrsandbox.jector.core.work;
 
 /**
- * A marker interface for the TaskBinder to work on, this 
+ * A marker interface for the {@link TaskExecutorsManager} to work on, this
  * object indicates the ability to perform "Work" under the Jector Framework terms.
  * 
  * @author pavl_g
