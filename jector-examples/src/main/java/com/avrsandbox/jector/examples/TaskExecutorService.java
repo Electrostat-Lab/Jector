@@ -48,7 +48,7 @@ public class TaskExecutorService implements Worker {
     /**
      * Writes a message into the task return.
      */
-    @ExecuteOn(executors = {TestTaskBinder.Daemon.class})
+    @ExecuteOn(executors = {TestTaskExecutorManager.DAEMON_THREAD})
     public String writeMessage(MethodArguments methodArguments, TaskExecutorsManager taskExecutorsManager) {
         try {
             System.out.println("-----------------------------------------------------");
@@ -60,7 +60,7 @@ public class TaskExecutorService implements Worker {
         } finally {
             /* 6) Activates concurrent tasks describing Jector concurrency model */
             taskExecutorsManager.getTaskExecutors()
-                      .get(TestTaskBinder.Looper.class)
+                      .get(TestTaskExecutorManager.LOOPER_THREAD)
                       .getTasks()
                       .get("showMessage")
                       .setActive(true);
@@ -70,13 +70,13 @@ public class TaskExecutorService implements Worker {
     /**
      * Shows a written message from the task return of another executor.
      */
-    @ExecuteOn(executors = {TestTaskBinder.Looper.class})
+    @ExecuteOn(executors = {TestTaskExecutorManager.LOOPER_THREAD})
     public void showMessage(MethodArguments methodArguments, TaskExecutorsManager taskExecutorsManager) {
         System.out.println("-----------------------------------------------------");
         System.out.println(Thread.currentThread().getName());
         /* Retrieves the writeMessage return value */
         System.out.println(taskExecutorsManager.getTaskExecutors()
-                                     .get(TestTaskBinder.Daemon.class)
+                                     .get(TestTaskExecutorManager.DAEMON_THREAD)
                                      .getTasks()
                                      .get("writeMessage")
                                      .getResult());
