@@ -41,7 +41,7 @@ import com.avrsandbox.jector.core.work.TaskExecutorsManager;
  * 
  * @author pavl_g
  */
-public final class TestTaskBinder {
+public final class TestTaskExecutorManager {
 
     private static final AppThread looperThread = new Looper();
     private static final AppThread daemonThread = new Daemon();
@@ -51,13 +51,9 @@ public final class TestTaskBinder {
     protected static final String LOOPER_THREAD = "LOOPER_THREAD";
     protected static final String FOREGROUND_THREAD = "FOREGROUND_THREAD";
 
-    public static void main(String[] args) throws InterruptedException {
-        /* 1) Start threads */
-        daemonThread.start();
-        looperThread.start();
-        foregroundThread.start();
+    public static void main(String[] args) {
 
-        /* 2) Register executors */
+        /* 2) Register executors and start them */
         taskExecutorsManager.registerTaskExecutor(DAEMON_THREAD, daemonThread);
         taskExecutorsManager.registerTaskExecutor(LOOPER_THREAD, looperThread);
         taskExecutorsManager.registerTaskExecutor(FOREGROUND_THREAD, foregroundThread);

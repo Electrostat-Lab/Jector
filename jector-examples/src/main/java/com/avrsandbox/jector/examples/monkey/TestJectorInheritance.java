@@ -34,7 +34,6 @@ package com.avrsandbox.jector.examples.monkey;
 import com.avrsandbox.jector.core.command.ExecuteOn;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.work.TaskExecutorsManager;
-import com.avrsandbox.jector.monkey.core.work.MonkeyTaskExecutor;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 
@@ -46,31 +45,31 @@ import com.jme3.scene.Spatial;
 public class TestJectorInheritance extends TaskExecutorService {
 
     @Override
-    @ExecuteOn(executors = {TestMonkeyTaskBinder.AssetLoaderThread.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.ASSET_LOADER})
     public Geometry setupSky(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         return super.setupSky(args, taskExecutorsManager);
     }
 
     @Override
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void setupScene(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         super.setupScene(args, taskExecutorsManager);
     }
 
     @Override
-    @ExecuteOn(executors = {TestMonkeyTaskBinder.AssetLoaderThread.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.ASSET_LOADER})
     public Spatial cacheAsset(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         return super.cacheAsset(args, taskExecutorsManager);
     }
 
     @Override
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void attachAsset(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         super.attachAsset(args, taskExecutorsManager);
     }
 
     @Override
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void setupCamera(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         super.setupCamera(args, taskExecutorsManager);
     }

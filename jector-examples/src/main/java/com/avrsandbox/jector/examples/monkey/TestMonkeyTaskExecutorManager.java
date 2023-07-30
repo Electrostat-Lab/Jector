@@ -45,10 +45,10 @@ import com.jme3.system.AppSettings;
  *
  * @author pavl_g
  */
-public final class TestMonkeyTaskBinder extends SimpleApplication implements TaskExecutorListeners {
+public final class TestMonkeyTaskExecutorManager extends SimpleApplication implements TaskExecutorListeners {
 
     protected final AppThread assetLoaderThread = new AssetLoaderThread();
-    protected MonkeyTaskExecutorsManager monkeyTaskBinder;
+    protected MonkeyTaskExecutorsManager monkeyTaskExecutorsManager;
     protected final MonkeyTaskExecutor monkeyTaskExecutor = new MonkeyTaskExecutor("MonkeyExecutor");
     protected static final String JME_EXECUTOR = "JME_EXECUTOR";
     protected static final String ASSET_LOADER = "ASSET_LOADER";
@@ -56,18 +56,17 @@ public final class TestMonkeyTaskBinder extends SimpleApplication implements Tas
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
 
-        TestMonkeyTaskBinder app = new TestMonkeyTaskBinder();
+        TestMonkeyTaskExecutorManager app = new TestMonkeyTaskExecutorManager();
         app.setSettings(settings);
         app.start();
     }
 
     @Override
     public void simpleInitApp() {
-        monkeyTaskBinder = new MonkeyTaskExecutorsManager(new TestJectorInheritance(), TestMonkeyTaskBinder.this);
+        monkeyTaskExecutorsManager = new MonkeyTaskExecutorsManager(new TestJectorInheritance(), TestMonkeyTaskExecutorManager.this);
 
-        monkeyTaskBinder.registerTaskExecutor(ASSET_LOADER, assetLoaderThread);
-        monkeyTaskBinder.registerTaskExecutor(JME_EXECUTOR, monkeyTaskExecutor);
-        monkeyTaskBinder.registerTaskExecutor(JME_EXECUTOR, monkeyTaskExecutor);
+        monkeyTaskExecutorsManager.registerTaskExecutor(ASSET_LOADER, assetLoaderThread);
+        monkeyTaskExecutorsManager.registerTaskExecutor(JME_EXECUTOR, monkeyTaskExecutor);
 
         assetLoaderThread.setActive(true);
         monkeyTaskExecutor.setActive(true);
@@ -80,8 +79,8 @@ public final class TestMonkeyTaskBinder extends SimpleApplication implements Tas
 
     @Override
     public void onExecutorInitialized(Application app) {
-        monkeyTaskBinder.bind(new MethodArguments());
-        monkeyTaskBinder.getTaskExecutors()
+        monkeyTaskExecutorsManager.bind(new MethodArguments());
+        monkeyTaskExecutorsManager.getTaskExecutors()
                 .get(ASSET_LOADER)
                 .getTasks()
                 .get("setupSky")
@@ -94,7 +93,7 @@ public final class TestMonkeyTaskBinder extends SimpleApplication implements Tas
     }
 
     @Override
-    public void onStopExecutorService() {
+    public void onDestructExecutorService() {
 
     }
 

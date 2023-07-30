@@ -35,7 +35,6 @@ import com.avrsandbox.jector.core.command.ExecuteOn;
 import com.avrsandbox.jector.core.command.MethodArguments;
 import com.avrsandbox.jector.core.work.TaskExecutorsManager;
 import com.avrsandbox.jector.core.work.Worker;
-import com.avrsandbox.jector.monkey.core.work.MonkeyTaskExecutor;
 import com.avrsandbox.jector.monkey.core.work.MonkeyWorkerTask;
 import com.avrsandbox.jector.monkey.util.MonkeyTasks;
 import com.avrsandbox.jector.util.Tasks;
@@ -60,10 +59,10 @@ import com.jme3.util.SkyFactory;
  */
 public class TaskExecutorService implements Worker {
 
-    @ExecuteOn(executors = {TestMonkeyTaskBinder.AssetLoaderThread.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.ASSET_LOADER})
     public Geometry setupSky(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         try {
-            SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, MonkeyTaskExecutor.class);
+            SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR);
 
             Geometry sky = (Geometry) SkyFactory.createSky(app.getAssetManager(),
                     app.getAssetManager().loadTexture("assets/Textures/sky.jpg"), Vector3f.UNIT_XYZ, SkyFactory.EnvMapType.EquirectMap);
@@ -76,10 +75,10 @@ public class TaskExecutorService implements Worker {
         }
     }
 
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void setupScene(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
-        SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, MonkeyTaskExecutor.class);
-        Geometry sky = Tasks.getWorkerTaskResult(taskExecutorsManager, TestMonkeyTaskBinder.AssetLoaderThread.class, "setupSky");
+        SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR);
+        Geometry sky = Tasks.getWorkerTaskResult(taskExecutorsManager, TestMonkeyTaskExecutorManager.ASSET_LOADER, "setupSky");
 
         app.getRootNode().attachChild(sky);
 
@@ -99,10 +98,10 @@ public class TaskExecutorService implements Worker {
         ApplicationTasks.setCacheAssetTaskActive(taskExecutorsManager, true);
     }
 
-    @ExecuteOn(executors = {TestMonkeyTaskBinder.AssetLoaderThread.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.ASSET_LOADER})
     public Spatial cacheAsset(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
         try {
-            SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, MonkeyTaskExecutor.class);
+            SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR);
             Spatial dataBaseStack = app.getAssetManager().loadModel("assets/Models/Database.j3o");
             dataBaseStack.setLocalScale(0.6f);
             dataBaseStack.setName("DataBaseStackModel");
@@ -123,14 +122,14 @@ public class TaskExecutorService implements Worker {
         }
     }
 
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void attachAsset(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
-        SimpleApplication application = MonkeyTasks.getApplication(taskExecutorsManager, MonkeyTaskExecutor.class);
+        SimpleApplication application = MonkeyTasks.getApplication(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR);
         Spatial dataBaseStack = Tasks.getWorkerTaskResult(taskExecutorsManager,
-                TestMonkeyTaskBinder.AssetLoaderThread.class, "cacheAsset");
+                TestMonkeyTaskExecutorManager.ASSET_LOADER, "cacheAsset");
         application.getRootNode().attachChild(dataBaseStack);
 
-        MonkeyWorkerTask task = MonkeyTasks.getWorkerTask(taskExecutorsManager, MonkeyTaskExecutor.class, "attachAsset");
+        MonkeyWorkerTask task = MonkeyTasks.getWorkerTask(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR, "attachAsset");
 
         System.out.println("JME Thread: " + Thread.currentThread().getName());
         System.out.println("Task Time per frame: " + task.getTimePerFrame());
@@ -141,13 +140,13 @@ public class TaskExecutorService implements Worker {
         ApplicationTasks.setCameraTaskActive(taskExecutorsManager, true);
     }
 
-    @ExecuteOn(executors = {MonkeyTaskExecutor.class})
+    @ExecuteOn(executors = {TestMonkeyTaskExecutorManager.JME_EXECUTOR})
     public void setupCamera(MethodArguments args, TaskExecutorsManager taskExecutorsManager) {
 
-        SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, MonkeyTaskExecutor.class);
+        SimpleApplication app = MonkeyTasks.getApplication(taskExecutorsManager, TestMonkeyTaskExecutorManager.JME_EXECUTOR);
 
-        Spatial dataBaseStack = (Spatial) Tasks.getWorkerTaskResult(taskExecutorsManager,
-                TestMonkeyTaskBinder.AssetLoaderThread.class, "cacheAsset");
+        Spatial dataBaseStack = Tasks.getWorkerTaskResult(taskExecutorsManager,
+                TestMonkeyTaskExecutorManager.ASSET_LOADER, "cacheAsset");
 
         app.getCamera().setFrustumNear(0.7f);
         ChaseCamera chaseCamera = new ChaseCamera(app.getCamera(), dataBaseStack, app.getInputManager());
@@ -161,31 +160,32 @@ public class TaskExecutorService implements Worker {
         chaseCamera.setHideCursorOnRotate(true);
 
         /* Disables this task */
-        ApplicationTasks.setCameraTaskActive(taskExecutorsManager, false);
+        taskExecutorsManager.unregisterTaskExecutor(TestMonkeyTaskExecutorManager.ASSET_LOADER);
+        taskExecutorsManager.unregisterTaskExecutor(TestMonkeyTaskExecutorManager.JME_EXECUTOR);
     }
 
     protected static class ApplicationTasks {
         public static void setCameraTaskActive(TaskExecutorsManager taskExecutorsManager, boolean value) {
             Tasks.getWorkerTask(taskExecutorsManager,
-                    MonkeyTaskExecutor.class,
+                    TestMonkeyTaskExecutorManager.JME_EXECUTOR,
                     "setupCamera").setActive(value);
         }
 
         public static void setAttachAssetTaskActive(TaskExecutorsManager taskExecutorsManager, boolean value) {
             Tasks.getWorkerTask(taskExecutorsManager,
-                    MonkeyTaskExecutor.class,
+                    TestMonkeyTaskExecutorManager.JME_EXECUTOR,
                     "attachAsset").setActive(value);
         }
 
         public static void setSetupSceneTaskActive(TaskExecutorsManager taskExecutorsManager, boolean value) {
             Tasks.getWorkerTask(taskExecutorsManager,
-                    MonkeyTaskExecutor.class,
+                    TestMonkeyTaskExecutorManager.JME_EXECUTOR,
                     "setupScene").setActive(value);
         }
 
         public static void setCacheAssetTaskActive(TaskExecutorsManager taskExecutorsManager, boolean value) {
             Tasks.getWorkerTask(taskExecutorsManager,
-                    TestMonkeyTaskBinder.AssetLoaderThread.class,
+                    TestMonkeyTaskExecutorManager.ASSET_LOADER,
                     "cacheAsset").setActive(value);
         }
     }
