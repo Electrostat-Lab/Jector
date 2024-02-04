@@ -4,9 +4,14 @@
 An advanced DI framework for JVM and Android applications based on the Java Reflection API with a specialized implementation for jMonkeyEngine Applications.
 
 ## Software specification: 
-| What's the problem? | How Jector solves it? | How DI works in general? | How DI works in Jector? | What are some good examples of Jector? | Synergism with Virtual Threads?
-|--------------------|----------------------|---------------------|----------------------------|--------------------------------------------|-------------------------|
-| The problem is doing multi-threaded/concurrent code in games is overwhelming and will require you to use synchronization or locks at some point in your application which might disrupt the architecture in your final software product. | Jector solves this by making good use of the DI pattern to bind your proposed function stack frame as a `WorkerTask` to a `TaskExecutor` instance, a TaskExecutor instance could be a Thread, a Game State, an Android Task,...etc. | DI stands for Dependency Injection, as the name implies, it consists of 3 objects, a dependency object, a dependent object, and an injector object, the dependency object contains the delegation code that is utilized by a dependent object, the injector object role is to pass the dependency object to the actual dependent to complete its job. | DI in Jector works by injecting a method as a WorkerTask (dependency) into a TaskExecutor (dependent object) using a TaskExecutorManager (injector object). | Loading game assets asynchronously is now easier, by enabling some tasks to be executed at some point on their respective threads. | WIP |
+| *_Item_* | *Description* |
+|-----------|-----------|
+| _Problem_ | The problem is doing multi-threaded/concurrent code in games is overwhelming and will require you to use synchronization or locks at some point in your application which might disrupt the architecture in your final software product. |
+| _Jector Approach_ | Jector solves this by making good use of the DI pattern to bind your proposed function stack frame as a `WorkerTask` to a `TaskExecutor` instance, a TaskExecutor instance could be a Thread, a Game State, an Android Task,...etc. |
+| _DI Mechanism_ | DI stands for Dependency Injection, as the name implies, it consists of 3 objects, a dependency object, a dependent object, and an injector object, the dependency object contains the delegation code that is utilized by a dependent object, the injector object role is to pass the dependency object to the actual dependent to complete its job. | 
+| _DI in Jector_ | DI in Jector works by injecting a method as a WorkerTask (dependency) into a TaskExecutor (dependent object) using a TaskExecutorManager (injector object). 
+| _Jector in practice_ | Loading game assets asynchronously is now easier, by enabling some tasks to be executed at some point on their respective threads. |
+| _Synergism with virtual threads_ | WIP |
 
 ## Building:
 ```bash
