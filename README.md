@@ -1,7 +1,7 @@
 # <img src="https://github.com/Software-Hardware-Codesign/Jector/assets/60224159/a7989a90-9c00-483c-9ffd-166f8a50b21c" width=60 length=60/> Jector [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3fe7dc8b13ec42a7a15e4c851d90f47e)](https://app.codacy.com/gh/Software-Hardware-Codesign/Jector/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![](https://img.shields.io/badge/Jector_Framework-latest_version-red)](https://github.com/Software-Hardware-Codesign/Jector/releases/tag/1.0.0-pre-alpha)
 [![](https://github.com/Software-Hardware-Codesign/jector/actions/workflows/build-test.yml/badge.svg)]() [![](https://github.com/Software-Hardware-Codesign/jector/actions/workflows/build-deploy.yml/badge.svg)]()
 
-An advanced DI framework for JVM and Android applications based on the Java Reflection API with a specialized implementation for jMonkeyEngine Applications. Jector provides a programming concurrent (order-parallelism/sync) model for best practices by injecting functions' stacks into schedulable tasks, and in turn into their deisgnated threads. Threads can be activated and controlled to achieve either parallelism or synchronicity.
+An advanced DI framework for JVM and Android applications based on the Java Reflection API with a specialized implementation for jMonkeyEngine Applications. Jector provides a programming concurrent (order-parallelism/sync) model for best practices by injecting functions' stacks into schedulable tasks, and in turn into their designated threads. Threads can be activated and controlled to achieve either parallelism or synchronicity.
 
 ## Software specification: 
 | *_Item_* | *Description* |
