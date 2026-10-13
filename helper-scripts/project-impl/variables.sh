@@ -9,7 +9,7 @@ maven_version="3.9.3"
 maven_bin="./apache-maven-$maven_version/bin/mvn"
 
 lib_pomFile="./helper-scripts/project-impl/publishing/jector.pom"
-ext_pomFile="./helper-scripts/project-impl/publishing/jector.pom"
+ext_pomFile="./helper-scripts/project-impl/publishing/jector-monkey.pom"
 
 passphrase="avrsandbox"
 
